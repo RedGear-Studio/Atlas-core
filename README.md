@@ -1,2 +1,3 @@
-# atlas-core
-`atlas-core` is the foundational library used to make the `Atlas77` language
+# Atlas-core
+
+Crate to host the [Atlas77](https://github.com/RedGear-Studio/atlas-core) project. An embeddable functional language.
