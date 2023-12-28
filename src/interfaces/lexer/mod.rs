@@ -1,11 +1,9 @@
 /// Contains all the Tokens needed for a basic Lexer
 pub mod token;
 /// Contains all the potential Lexer Error
-pub mod lex_errors;
+pub mod lexer_errors;
 
-use std::path::PathBuf;
-
-use crate::{TokenKind, Token};
+use crate::{Token, lexer_errors::LexerError};
 
 /// The `Lexer` trait defines the interface for lexical analysis.
 pub trait Lexer {
@@ -14,5 +12,5 @@ pub trait Lexer {
     ///
     /// A `Vec` of `WithSpan` objects, where each `WithSpan` contains a `TokenKind::TokenKind` along with its associated
     /// span in the source code.
-    fn tokenize(&mut self, path: &'static str) -> Vec<Token>;
+    fn tokenize(&mut self) -> Result<Vec<Token>, &dyn LexerError>;
 }

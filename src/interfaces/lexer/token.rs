@@ -7,14 +7,26 @@ use crate::utils::span::{Span, Spanned};
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Token {
     span: Span,
-    pub kind: TokenKind,
+    kind: TokenKind,
 }
 
 impl Spanned for Token {
+    #[inline(always)]
     fn span(&self) -> Span {
         self.span
     }
 }
+
+impl Token {
+    pub fn new(span: Span, kind: TokenKind) -> Self {
+        Self { span, kind }
+    }
+    #[inline(always)]
+    pub fn kind(&self) -> TokenKind {
+        self.kind
+    }
+}
+
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Keyword {

@@ -6,11 +6,13 @@ pub struct BytePos(usize);
 
 impl BytePos {
     /// Shifts the byte position by the length of a character.
+    #[inline(always)]
     pub fn shift(self, ch: char) -> Self {
         BytePos(self.0 + ch.len_utf8())
     }
 
     /// Shifts the byte position by a specified number of bytes.
+    #[inline(always)]
     pub fn shift_by(self, n: usize) -> Self {
         BytePos(self.0 + n)
     }
@@ -23,7 +25,7 @@ impl fmt::Display for BytePos {
 }
 
 /// Represents a span in a source file, defined by a start and end byte position.
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Default)]
 pub struct Span {
     /// The position of character at the start of the span
     pub start: BytePos,
@@ -46,6 +48,7 @@ impl Span {
     }
 
     /// Creates an empty `Span` with both start and end positions at zero.
+    #[inline]
     pub const fn empty() -> Self {
         Span {
             start: BytePos(0),
@@ -123,6 +126,7 @@ pub trait Spanned {
 }
 
 impl Spanned for Span {
+    #[inline(always)]
     fn span(&self) -> Span {
         *self
     }

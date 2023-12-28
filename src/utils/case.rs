@@ -2,7 +2,7 @@ use heck::*;
 
 /// The `Case` trait defines methods for checking the naming convention of identifiers.
 /// 
-/// NB: It's already implemented in String and &str by default, so you don't need to implement it yourself.
+/// NB: It's already implemented in ``String`` and ``&str`` by default, so you don't need to implement it yourself.
 pub trait Case {
     /// Checks if an identifier follows the snake_case naming convention.
     ///
@@ -31,44 +31,44 @@ pub trait Case {
 }
 
 impl Case for String {
-    #[inline]
+    #[inline(always)]
     fn is_snake_case(&mut self) -> bool {
         self.to_snake_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_camel_case(&mut self) -> bool {
         self.to_lower_camel_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_pascal_case(&mut self) -> bool {
         self.to_pascal_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_shouty_snake_case(&mut self) -> bool {
         self.to_shouty_snake_case() == *self
     }
 }
 
 impl Case for &str {
-    #[inline]
+    #[inline(always)]
     fn is_snake_case(&mut self) -> bool {
         self.to_snake_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_camel_case(&mut self) -> bool {
         self.to_lower_camel_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_pascal_case(&mut self) -> bool {
         self.to_pascal_case() == *self
     }
 
-    #[inline]
+    #[inline(always)]
     fn is_shouty_snake_case(&mut self) -> bool {
         self.to_shouty_snake_case() == *self
     }   

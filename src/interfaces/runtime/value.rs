@@ -1,5 +1,6 @@
 use std::{collections::HashMap, ops::{Add, Sub, Mul, Div}};
 
+/// TODO: Rework the Value system
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum Value {
     Integer(i64),

@@ -2,5 +2,5 @@
 pub mod case;
 /// Contains all the definition and implementations for the enums/traits/structs for the Span related stuff.
 /// 
-/// (`BytePos`, `WithSpan`, `Span`)
+/// (`BytePos`, `Span`)
 pub mod span;

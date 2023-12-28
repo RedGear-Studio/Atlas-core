@@ -1,3 +1,5 @@
+pub mod pass_error;
+
 use crate::nodes::Program;
 
 pub trait Pass {

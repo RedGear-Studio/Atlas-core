@@ -7,3 +7,4 @@ pub mod runtime;
 /// Contains all the definitions for the enums/traits/structs for the Pass related stuff.
 pub mod pass;
 pub mod compiler;
+pub mod error;
