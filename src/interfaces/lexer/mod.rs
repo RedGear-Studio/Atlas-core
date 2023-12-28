@@ -12,5 +12,5 @@ pub trait Lexer {
     ///
     /// A `Vec` of `WithSpan` objects, where each `WithSpan` contains a `TokenKind::TokenKind` along with its associated
     /// span in the source code.
-    fn tokenize(&mut self) -> Result<Vec<Token>, &dyn LexerError>;
+    fn tokenize(&mut self) -> Result<Vec<Token>, Box<dyn LexerError>>;
 }
