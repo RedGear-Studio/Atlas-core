@@ -29,23 +29,6 @@ impl Token {
 
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Keyword {
-    If,
-    Else,
-    Then,
-    As,    
-    Let,    
-    Struct,    
-    Enum,    
-    Do,
-    End,
-    Match,
-    With,
-    Or,
-    And,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Literal {
     ///Default int literal, may change in the parser based on the type of the variable
     Int(i64),
@@ -65,8 +48,8 @@ pub enum TokenKind {
     /// A literal see [Literal] for more information
     Literal(Literal),
 
-    /// A keyword see [Keyword] for more information
-    Keyword(Keyword),
+    /// A keyword
+    Keyword(Intern<String>),
 
     //One character tokens
 
@@ -154,30 +137,9 @@ pub enum TokenKind {
     UnknownChar(char),
 
     /// Start Of File
-    SOI,
+    SoI,
     /// End Of File
-    EOI,
-}
-
-impl fmt::Display for Keyword {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Keyword::*;
-        match self {
-            If => write!(f, "if"),
-            Else => write!(f, "else"),
-            Then => write!(f, "then"),
-            As => write!(f, "as"),
-            Let => write!(f, "let"),
-            Struct => write!(f, "struct"),
-            Enum => write!(f, "enum"),
-            Do => write!(f, "do"),
-            End => write!(f, "end"),
-            Match => write!(f, "match"),
-            With => write!(f, "with"),
-            Or => write!(f, "or"),
-            And => write!(f, "and"),
-        }
-    }
+    EoI,
 }
 
 impl fmt::Display for Literal {
@@ -185,10 +147,10 @@ impl fmt::Display for Literal {
         use Literal::*;
         match self {
             Int(i) => write!(f, "{}", i),
-            Float(i) => write!(f, "{}", i),
-            Bool(i) => write!(f, "{}", i),
+            Float(fl) => write!(f, "{}", fl),
+            Bool(b) => write!(f, "{}", b),
             Identifier(i) => write!(f, "{}", i),
-            StringLiteral(i) => write!(f, "{}", i),
+            StringLiteral(s) => write!(f, "{}", s),
         }
     }
 }
