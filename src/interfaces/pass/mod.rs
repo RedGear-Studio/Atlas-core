@@ -1,9 +1,8 @@
-pub mod pass_error;
-
 use crate::nodes::Program;
+use super::error::Error;
 
-use self::pass_error::PassError;
-
-pub trait Pass {
-    fn apply(&mut self, program: &mut Program) -> Result<Program, Box<dyn PassError>>;   
+pub trait Pass<'p> {
+    fn apply(program: &'p mut Program) -> Result<Program<'p>, Box<dyn PassError>>;   
 }
+
+pub trait PassError: Error {}

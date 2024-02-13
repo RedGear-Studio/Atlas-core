@@ -106,10 +106,10 @@ impl Spanned for Struct<'_> {
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Function<'a> {
     pub name: Intern<String>,
-    span: Span,
     pub body: &'a Node<'a>,
     pub args: &'a [(Intern<String>, DataType<'a>)],
     pub return_type: DataType<'a>,
+    span: Span,
 }
 
 impl Spanned for Function<'_> {
@@ -148,12 +148,13 @@ impl Spanned for Expression<'_> {
 pub struct MatchExpression<'a> {
     pub expr: &'a Node<'a>,
     pub arms: &'a [MatchArm<'a>],
+    span: Span
 }
 
 impl Spanned for MatchExpression<'_> {
     #[inline(always)]
     fn span(&self) -> Span {
-        self.expr.span()
+        self.span
     }
 }
 
@@ -161,12 +162,13 @@ impl Spanned for MatchExpression<'_> {
 pub struct MatchArm<'a> {
     pub pattern: &'a Node<'a>,
     pub body: &'a Node<'a>,
+    span: Span
 }
 
 impl Spanned for MatchArm<'_> {
     #[inline(always)]
     fn span(&self) -> Span {
-        self.pattern.span()
+        self.span
     }
 }
 
@@ -175,39 +177,42 @@ pub struct Lambda<'a> {
     //Should there only be one arg? (arity of 1 by default in the language for lambdas)
     pub args: &'a [Intern<String>],
     pub body: &'a Node<'a>,
+    span: Span
 }
 
 impl Spanned for Lambda<'_> {
     #[inline(always)]
     fn span(&self) -> Span {
-        self.body.span()
+        self.span
     }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct BinaryExpression<'a> {
-    lhs: &'a Node<'a>,
-    rhs: &'a Node<'a>,
-    op: BinaryOperator
+    pub lhs: &'a Node<'a>,
+    pub rhs: &'a Node<'a>,
+    pub op: BinaryOperator,
+    span: Span
 }
 
 impl Spanned for BinaryExpression<'_> {
     #[inline(always)]
     fn span(&self) -> Span {
-        self.lhs.span()
+        self.span
     }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct UnaryExpression<'a> {
     pub expr: &'a Node<'a>,
-    pub op: UnaryOperator
+    pub op: UnaryOperator,
+    span: Span
 }
 
 impl Spanned for UnaryExpression<'_> {
     #[inline(always)]
     fn span(&self) -> Span {
-        self.expr.span()
+        self.span
     }
 }
 
@@ -228,8 +233,9 @@ impl Spanned for FunctionCall<'_> {
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct VariableDecl<'a> {
     pub name: Intern<String>,
-    pub span: Span,
+    //pub mutable: bool,
     pub ty: DataType<'a>,
+    span: Span,
 }
 
 impl Spanned for VariableDecl<'_> {
@@ -241,7 +247,7 @@ impl Spanned for VariableDecl<'_> {
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Literal {
-    val: LiteralValue,
+    pub val: LiteralValue,
     span: Span,
 }
 
