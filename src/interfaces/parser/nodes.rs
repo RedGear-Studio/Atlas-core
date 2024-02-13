@@ -9,7 +9,7 @@ pub type Program<'a> = Vec<Node<'a>>;
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Node<'a> {
     kind: NodeKind<'a>,
-    span: Span,
+    pub span: Span,
 }
 
 impl<'a> Node<'a> {
@@ -79,7 +79,7 @@ impl Spanned for Declaration<'_> {
 pub struct Enum<'a> {
     pub name: Intern<String>,
     pub variants: &'a [(Intern<String>, u16)],
-    span: Span,
+    pub span: Span,
 }
 
 impl Spanned for Enum<'_> {
@@ -93,7 +93,7 @@ impl Spanned for Enum<'_> {
 pub struct Struct<'a> {
     pub name: Intern<String>,
     pub fields: &'a [(Intern<String>, DataType<'a>)],
-    span: Span,
+    pub span: Span,
 }
 
 impl Spanned for Struct<'_> {
@@ -109,7 +109,7 @@ pub struct Function<'a> {
     pub body: &'a Node<'a>,
     pub args: &'a [(Intern<String>, DataType<'a>)],
     pub return_type: DataType<'a>,
-    span: Span,
+    pub span: Span,
 }
 
 impl Spanned for Function<'_> {
@@ -148,7 +148,7 @@ impl Spanned for Expression<'_> {
 pub struct MatchExpression<'a> {
     pub expr: &'a Node<'a>,
     pub arms: &'a [MatchArm<'a>],
-    span: Span
+    pub span: Span,
 }
 
 impl Spanned for MatchExpression<'_> {
@@ -162,7 +162,7 @@ impl Spanned for MatchExpression<'_> {
 pub struct MatchArm<'a> {
     pub pattern: &'a Node<'a>,
     pub body: &'a Node<'a>,
-    span: Span
+    pub span: Span,
 }
 
 impl Spanned for MatchArm<'_> {
@@ -177,7 +177,7 @@ pub struct Lambda<'a> {
     //Should there only be one arg? (arity of 1 by default in the language for lambdas)
     pub args: &'a [Intern<String>],
     pub body: &'a Node<'a>,
-    span: Span
+    pub span: Span,
 }
 
 impl Spanned for Lambda<'_> {
@@ -192,7 +192,7 @@ pub struct BinaryExpression<'a> {
     pub lhs: &'a Node<'a>,
     pub rhs: &'a Node<'a>,
     pub op: BinaryOperator,
-    span: Span
+    pub span: Span,
 }
 
 impl Spanned for BinaryExpression<'_> {
@@ -206,7 +206,7 @@ impl Spanned for BinaryExpression<'_> {
 pub struct UnaryExpression<'a> {
     pub expr: &'a Node<'a>,
     pub op: UnaryOperator,
-    span: Span
+    pub span: Span,
 }
 
 impl Spanned for UnaryExpression<'_> {
@@ -235,7 +235,7 @@ pub struct VariableDecl<'a> {
     pub name: Intern<String>,
     //pub mutable: bool,
     pub ty: DataType<'a>,
-    span: Span,
+    pub span: Span,
 }
 
 impl Spanned for VariableDecl<'_> {
@@ -248,7 +248,7 @@ impl Spanned for VariableDecl<'_> {
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Literal {
     pub val: LiteralValue,
-    span: Span,
+    pub span: Span,
 }
 
 impl Spanned for Literal {
