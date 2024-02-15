@@ -9,7 +9,7 @@ pub mod data_types;
 /// The `Parser` trait defines the interface for parsing source code and generating an abstract syntax tree (AST).
 pub trait Parser {
     /// Parses a sequence of tokens, generating an abstract syntax tree (AST).
-    fn parse(tokens: Vec<Token>, path: &'static str) -> Result<Program<'_>, Box<dyn ParseError>>;
+    fn parse(tokens: Vec<Token>, path: &'static str) -> (Program<'_>, Vec<Box<dyn ParseError>>);
 }
 
 pub trait ParseError: Error {}
