@@ -249,7 +249,7 @@ macro_rules! keyword {
 /// There's currently no support for symbol with more than 1 character (apart from numbers, identifier and keywords)
 /// NB: the order could do the trick for now, like putting "<=" before "<" should work, but it's only a temporary fix
 macro_rules! symbols {
-    ($($sym:literal => $variant:item),* ) => {
+    ($($sym:literal => $variant:ident),* ) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
