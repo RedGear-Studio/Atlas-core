@@ -2,10 +2,8 @@
 /// You can list all the reserved keywords you want here (Just need to put the string)
 #[macro_export]
 macro_rules! lexer {
-    (number: $num:expr, symbol: $sym:expr, keyword: $key:expr) => {
-        use crate::map;
+    () => {
 use crate::utils::span::*;
-use core::fmt;
 use internment::Intern;
 use std::{collections::HashMap, fmt::Display, iter::Peekable, str::Chars};
 
@@ -61,11 +59,7 @@ impl Lexer<'_> {
     }
 }
 
-impl Lexer<'_> {
-    $num
-    $sym
-    $key
-}
+
 
 impl<'a> Lexer<'a> {
     /// Create a new empty `Lexer`
@@ -229,22 +223,23 @@ impl Display for LexError {
 
 #[macro_export]
 macro_rules! keyword {
-    ($($x:literal),*) => {
-        use crate::map;
-        use internment::Intern;
-        use TokenKind;
-        fn populate_keyword(&mut self) {
-            self.keywords = map! {
-                $(
-                    Intern::new(String::from(x)) => TokenKind::Keyword(Intern::new(String::from(x))),
-                )*
+    ($($x:literal),* $(,)?) => {
+        impl Lexer<'_> {
+            fn populate_keyword(&mut self) {
+                self.keywords = map! {
+                    $(
+                        Intern::new(String::from($x)) => TokenKind::Keyword(Intern::new(String::from($x))),
+                    )*
+                }
             }
         }
     };
     () => {
         use crate::map;
-        fn populate_keyword(&mut self) {
-            self.keywords = map!();
+        impl Lexer {
+            fn populate_keyword(&mut self) {
+                self.keywords = map!();
+            }
         }
     }
 }
@@ -254,9 +249,6 @@ macro_rules! keyword {
 /// NB: the order could do the trick for now, like putting "<=" before "<" should work, but it's only a temporary fix
 macro_rules! symbols {
     ($($sym:literal => $variant:ident),* ) => {
-        use crate::utils::{Spanned, Span};
-        use crate::lexer::{LexError, Lexer};
-        use internment::Intern;
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
@@ -295,6 +287,7 @@ macro_rules! symbols {
             StringLiteral(Intern<String>),
         }
 
+        #[derive(Debug, Clone, Copy, PartialEq)]
         pub enum TokenKind {
             /// A literal see [Literal] for more information
             Literal(Literal),
@@ -302,11 +295,13 @@ macro_rules! symbols {
             /// A keyword
             Keyword(Intern<String>),
             $(
-                variant,
+                $variant,
             )*
+            EoI,
+            SoI
         }
 
-        impl Lexer {
+        impl Lexer<'_> {
             fn lex(&mut self, ch: char) -> Result<TokenKind, LexError> {
                 match ch {
                     '\n' | '\t' | ' ' | '\r' => {
@@ -326,7 +321,7 @@ macro_rules! symbols {
                         }
                     },
                     $(
-                        sym => Ok(TokenKind::variant),
+                        $sym => Ok(TokenKind::$variant),
                     )*
                     x if x.is_numeric() => Ok(self.number(x).unwrap()),
                     ch if ch.is_alphabetic() || ch == '_' => Ok(self.identifier(ch).unwrap()),
@@ -384,7 +379,7 @@ macro_rules! symbols {
 #[macro_export]
 macro_rules! number {
     (enable_f64: $f64:expr, enable_i64: $i64:expr) => {
-        use crate::lexer::{TokenKind, Token, Literal}
+        impl Lexer<'_> {
         fn number(&mut self, c: char) -> Option<TokenKind> {
             let mut number = String::new();
             number.push(c);
@@ -399,19 +394,26 @@ macro_rules! number {
                 number.push_str(&num);
     
             }
-            is_number(&number)
+            self.is_number(&number)
         }
         fn is_number(&self, s: &str) -> Option<TokenKind> {
-            if $i64 && let Some(i) = s.parse::<i64>() {
-                Some(TokenKind::Literal(Literal::Int(i)))
-            } else if $f64 && let Some(f) = s.parse::<f64>() {
+            
+            if $i64 {
+                if let Ok(i) = s.parse::<i64>() {
+                    Some(TokenKind::Literal(Literal::Int(i)))
+                } else {
+                    None
+                }
+            } else if $f64 {
+                if let Ok(f) = s.parse::<f64>() {
                 Some(TokenKind::Literal(Literal::Float(f)))
+                } else {
+                    None
+                }
             } else {
                 None
             }
         }
-    };
-    () => {
-
     }
+    };
 }

@@ -31,7 +31,7 @@ macro_rules! map {
             map
         }
     };
-    ($($key:expr => $val:expr),*) => {
+    ($($key:expr => $val:expr),* $(,)?) => {
         {
             let mut map = HashMap::new();
             $(map.insert($key, $val);)*
@@ -39,3 +39,8 @@ macro_rules! map {
         }
     }
 }
+
+lexer!();
+number!(enable_f64: true, enable_i64: true);
+symbols!('$' => DollarSign, '#' => HashTag);
+keyword!("section");
