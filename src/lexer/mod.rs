@@ -164,6 +164,11 @@ pub(crate) enum LexError {
         recoverable: bool,
         code: u64,
     },
+    UnsupportedNumber {
+        span: Span,
+        recoverable: bool,
+        code: u64
+    },
 }
 
 pub trait Error {
@@ -178,12 +183,14 @@ impl Error for LexError {
         match self {
             LexError::UnknownCharacter { code, .. } => *code,
             LexError::UnexpectedEndOfInput { code, .. } => *code,
+            LexError::UnsupportedNumber { code, .. } => *code,
         }
     }
     fn recoverable(&self) -> bool {
         match self {
             LexError::UnknownCharacter { recoverable, .. } => *recoverable,
             LexError::UnexpectedEndOfInput { recoverable, .. } => *recoverable,
+            LexError::UnsupportedNumber { recoverable, .. } => *recoverable
         }
     }
     ///Todo
@@ -197,6 +204,9 @@ impl Error for LexError {
             }
             LexError::UnexpectedEndOfInput { span, .. } => {
                 format!("Unexpected end of input here: {}", span)
+            }
+            LexError::UnsupportedNumber { span } => {
+                format!("It looks like you're trying to parse a number your lexer doesn't support here: {}", span)
             }
         }
     }
@@ -324,7 +334,16 @@ macro_rules! symbols {
                     $(
                         $sym => Ok(TokenKind::$variant),
                     )*
-                    x if x.is_numeric() => Ok(self.number(x).unwrap()),
+                    x if x.is_numeric() => {
+                        match self.number(x) {
+                            Some(n) => {
+                                Ok(n)
+                            },
+                            None => {
+
+                            }
+                        }
+                    },
                     ch if ch.is_alphabetic() || ch == '_' => Ok(self.identifier(ch).unwrap()),
                     '"' => {
                         let mut string = String::new();
