@@ -129,11 +129,50 @@ impl fmt::Display for LineInformation {
     }
 }
 
+/// A trait representing an object that has an associated span in the source code.
+/// 
+/// This trait is used to obtain the span (range of positions) for a token or other 
+/// syntactic element. It provides methods to get the start and end positions 
+/// of the span.
+/// 
+/// # Required Methods
+/// 
+/// - `span(&self) -> Span`: Returns the `Span` representing the start and end positions of the object.
+/// 
+/// # Provided Methods
+/// 
+/// - `start(&self) -> usize`: Returns the starting position of the span. 
+///   This method is implemented using the `span` method and returns the start position.
+/// - `end(&self) -> usize`: Returns the ending position of the span. 
+///   This method is implemented using the `span` method and returns the end position.
+/// 
+/// # Example
+/// 
+/// ```
+/// use atlas_core::utils::span::Spanned;
+/// 
+/// struct Token {
+///     span: Span,
+/// }
+/// 
+/// impl Spanned for Token {
+///     fn span(&self) -> Span {
+///         self.span
+///     }
+/// }
+/// 
+/// let token = Token { span: Span { start: (5, 0), end: (10, 0) } };
+/// assert_eq!(token.start(), 5);
+/// assert_eq!(token.end(), 10);
+/// ```
 pub trait Spanned {
+    /// Returns the `Span` representing the start and end positions of the object.
     fn span(&self) -> Span;
+    /// Returns the starting position of the span. 
     fn start(&self) -> usize {
         self.span().start.0
     }
+    /// Returns the end position of the span.
     fn end(&self) -> usize {
         self.span().end.0
     }

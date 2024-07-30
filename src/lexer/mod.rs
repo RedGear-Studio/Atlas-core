@@ -1,5 +1,68 @@
-/// This Lexer currently only accept single symbol, but identifier, numbers, strings and chars are treated by default.
-/// You can list all the reserved keywords you want here (Just need to put the string)
+/// A macro to define and initialize a lexer with default or customized configurations.
+///
+/// This macro generates the `Lexer` struct and implements necessary methods and error handling 
+/// to facilitate lexical analysis of a given input. It includes functions for tokenizing input, 
+/// consuming characters based on conditions, and handling errors encountered during the lexing process.
+///
+/// # Syntax
+///
+/// The macro can be invoked without any parameters:
+/// ```rust
+/// lexer!();
+/// ```
+/// This initializes a lexer with default configurations and provides the necessary methods and structures.
+///
+/// # Generated Structures and Implementations
+///
+/// The macro generates the following:
+///
+/// - `struct Lexer<'lex>`: The lexer structure which holds the state and methods for lexical analysis.
+///   - Fields:
+///     - `path`: The file path of the input.
+///     - `current_pos`: The current byte position in the input.
+///     - `it`: An iterator over the characters of the input.
+///     - `keywords`: A `HashMap` for storing keywords and their corresponding token kinds.
+///
+/// - `impl Lexer<'_>`: Implementation block for the lexer methods.
+///   - `fn tokenize(path: &'static str, contents: &str) -> Result<Vec<Token>, Box<dyn Error>>`: Tokenizes the given input.
+///   - `fn new(path: &'static str, contents: &'a str) -> Self`: Initializes a new lexer instance.
+///   - `fn next(&mut self) -> Option<char>`: Advances to the next character.
+///   - `fn peek(&mut self) -> Option<&char>`: Peeks at the next character without consuming it.
+///   - `fn either(&mut self, to_match: char, matched: TokenKind, unmatched: TokenKind) -> TokenKind`: Matches a character against two token kinds.
+///   - `fn consume_if<F>(&mut self, f: F) -> bool where F: Fn(char) -> bool`: Consumes the next character if it matches a condition.
+///   - `fn consume_if_next<F>(&mut self, f: F) -> bool where F: Fn(char) -> bool`: Consumes the next character if the next character matches a condition.
+///   - `fn consume_while<F>(&mut self, f: F) -> Vec<char> where F: Fn(char) -> bool`: Consumes characters while a condition is true.
+///
+/// - `enum LexError`: Enumeration for representing lexing errors.
+///   - Variants:
+///     - `UnknownCharacter`: Represents an unknown character error.
+///     - `UnexpectedEndOfInput`: Represents an unexpected end of input error.
+///     - `UnsupportedNumber`: Represents an unsupported number error.
+///
+/// - `trait Error`: Trait for defining error handling.
+///   - Methods:
+///     - `fn code(&self) -> u64`: Returns the error code.
+///     - `fn recoverable(&self) -> bool`: Indicates if the error is recoverable.
+///     - `fn help(&self) -> Option<String>`: Provides help information for the error.
+///     - `fn message(&self) -> String`: Returns the error message.
+///
+/// - `impl Error for LexError`: Implementation of the `Error` trait for `LexError`.
+///
+/// - `impl Spanned for LexError`: Implementation of the `Spanned` trait for `LexError`.
+///
+/// - `impl Display for LexError`: Implementation of the `Display` trait for `LexError`.
+///
+/// # Example Usage in Lexer
+///
+/// ```rust
+/// lexer!();
+///
+/// impl Lexer<'_> {
+///     fn example(&self) {
+///         // Example method using the generated lexer structure and methods.
+///     }
+/// }
+/// ```
 #[macro_export]
 macro_rules! lexer {
     () => {
@@ -233,6 +296,44 @@ impl Display for LexError {
 
 
 #[macro_export]
+/// A macro to define keywords recognized by a lexer and map them to `TokenKind::Keyword` variants.
+/// 
+/// This macro generates an implementation of the `populate_keyword` method in the `Lexer` struct 
+/// to populate a `HashMap` with specified keywords or to initialize an empty `HashMap` if no keywords are provided.
+/// 
+/// # Syntax
+/// 
+/// The macro can be invoked in two forms:
+/// 
+/// 1. **Custom keywords**:
+///    ```
+///    keyword!( "keyword1", "keyword2", ... );
+///    ```
+///    - Each keyword is a string literal that will be recognized by the lexer and mapped to a `TokenKind::Keyword` variant.
+/// 
+/// 2. **No keywords**:
+///    ```
+///    keyword!();
+///    ```
+///    - Initializes an empty `HashMap` for keywords.
+/// 
+/// # Example
+/// 
+/// ```rust
+/// // Define custom keywords
+/// keyword!( "fn", "let", "if" );
+/// 
+/// // Initialize an empty keyword map
+/// keyword!();
+/// ```
+/// 
+/// # Generated Methods
+/// 
+/// The macro generates the following method within the `Lexer` struct:
+/// 
+/// - `fn populate_keyword(&mut self)`:
+///   - Populates the `keywords` field of the `Lexer` struct with the specified keywords or initializes it as empty.
+/// 
 macro_rules! keyword {
     ($($x:literal),* $(,)?) => {
         impl Lexer<'_> {
@@ -257,8 +358,53 @@ macro_rules! keyword {
 }
 
 #[macro_export]
-/// There's currently no support for symbol with more than 1 character (apart from numbers, identifier and keywords)
-/// NB: the order could do the trick for now, like putting "<=" before "<" should work, but it's only a temporary fix
+/// A macro to define the symbols recognized by a lexer and map them to specific token variants.
+/// 
+/// This macro generates an implementation of the `Token` struct, `TokenKind` enum, and 
+/// related methods in the `Lexer` struct to handle single-character symbols. It also 
+/// includes default implementations if no symbols are specified.
+/// 
+/// **Note:** This macro does not support multi-character symbols.
+/// 
+/// # Syntax
+/// 
+/// The macro can be invoked in two forms:
+/// 
+/// 1. **Custom symbols**:
+///    ```
+///    symbols!( 'symbol' => Variant, ... );
+///    ```
+///    - `symbol`: A single-character symbol to be recognized by the lexer.
+///    - `Variant`: The corresponding variant in the `TokenKind` enum.
+/// 
+/// 2. **Default symbols**:
+///    ```
+///    symbols!();
+///    ```
+///    - Uses a predefined set of single-character symbols and their corresponding `TokenKind` variants.
+/// 
+/// # Example
+/// 
+/// ```rust
+/// // Define custom symbols
+/// symbols!(
+///     '+' => Plus,
+///     '-' => Minus,
+///     '*' => Asterisk
+/// );
+/// 
+/// // Use default symbols
+/// symbols!();
+/// ```
+/// 
+/// # Generated Types and Methods
+/// 
+/// The macro generates the following types and methods:
+/// 
+/// - `Token` struct: Represents a token with a span and kind.
+/// - `TokenKind` enum: Enumerates the different kinds of tokens, including literals, keywords, and symbols.
+/// - Implementation of the `Spanned` trait for the `Token` struct.
+/// - Methods in the `Lexer` struct to handle symbols and identify tokens.
 macro_rules! symbols {
     ($($sym:literal => $variant:ident),* ) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
@@ -403,9 +549,94 @@ macro_rules! symbols {
         
 
     };
+    () => {
+        symbols!{
+            '+' => Plus,
+            '-' => Minus,
+            '*' => Asterisk,
+            '/' => Slash,
+            '%' => Percent,
+            '=' => Equal,
+            //'==' => EqualEqual,
+            //'!=' => NotEqual,
+            '<' => LessThan,
+            '>' => GreaterThan,
+            //'<=' => LessThanEqual,
+            //'>=' => GreaterThanEqual,
+            '!' => Exclamation,
+            '&' => Ampersand,
+            //'&&' => DoubleAmpersand,
+            '|' => Pipe,
+            //'||' => DoublePipe,
+            '^' => Caret,
+            '~' => Tilde,
+            //'<<' => LeftShift,
+            //'>>' => RightShift,
+            '(' => LeftParen,
+            ')' => RightParen,
+            '[' => LeftBracket,
+            ']' => RightBracket,
+            '{' => LeftBrace,
+            '}' => RightBrace,
+            '.' => Dot,
+            //'..' => DoubleDot,
+            //'...' => Ellipsis,
+            ',' => Comma,
+            ';' => Semicolon,
+            ':' => Colon,
+            //'::' => DoubleColon,
+            '?' => Question,
+            '#' => Hash,
+            '$' => Dollar,
+            '@' => At,
+            '\\' => Backslash,
+            '\'' => SingleQuote,
+            '"' => DoubleQuote,
+            '`' => Backtick
+        }
+    }
 }
 
 #[macro_export]
+/// A macro to define number handling methods in a lexer, with configurable support for 
+/// floating-point and integer literals.
+///
+/// This macro generates an implementation of the `Lexer` struct that includes methods 
+/// for recognizing and parsing numeric literals from the input. It provides options to 
+/// enable or disable support for floating-point (`f64`) and integer (`i64`) literals.
+///
+/// # Syntax
+///
+/// The macro can be invoked in three forms:
+///
+/// 1. **Full configuration**:
+///    ```
+///    number!(enable_f64: bool, enable_i64: bool);
+///    ```
+///    - `enable_f64`: Enables or disables support for `f64` literals.
+///    - `enable_i64`: Enables or disables support for `i64` literals.
+///
+/// 2. **Single boolean configuration**:
+///    ```
+///    number!(bool);
+///    ```
+///    - This form enables or disables both `f64` and `i64` support with the same boolean value.
+///
+/// 3. **Default configuration**:
+///    ```
+///    number!();
+///    ```
+///    - This form enables support for both `f64` and `i64` literals by default.
+///
+/// # Generated Methods
+///
+/// The macro generates the following methods within the `Lexer` struct:
+///
+/// - `fn number(&mut self, c: char) -> Option<TokenKind>`
+///   - Recognizes and constructs a numeric literal starting with the given character `c`.
+/// - `fn is_number(&self, s: &str) -> Option<TokenKind>`
+///   - Determines if the given string `s` is a valid numeric literal and returns the 
+///     corresponding `TokenKind`.
 macro_rules! number {
     (enable_f64: $f64:expr, enable_i64: $i64:expr) => {
         impl Lexer<'_> {
@@ -445,4 +676,10 @@ macro_rules! number {
         }
     }
     };
+    ($x:expr) => {
+        number!(enable_f64: $x, enable_i64: $x)
+    };
+    () => {
+        number!(enable_f64: true, enable_i64: true)
+    }
 }
