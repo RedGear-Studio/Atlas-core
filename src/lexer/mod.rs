@@ -205,7 +205,7 @@ impl Error for LexError {
             LexError::UnexpectedEndOfInput { span, .. } => {
                 format!("Unexpected end of input here: {}", span)
             }
-            LexError::UnsupportedNumber { span } => {
+            LexError::UnsupportedNumber { span, .. } => {
                 format!("It looks like you're trying to parse a number your lexer doesn't support here: {}", span)
             }
         }
@@ -217,6 +217,7 @@ impl Spanned for LexError {
         match self {
             LexError::UnknownCharacter { span, .. } => *span,
             LexError::UnexpectedEndOfInput { span, .. } => *span,
+            LexError::UnsupportedNumber { span, .. } => *span
         }
     }
 }
@@ -340,7 +341,15 @@ macro_rules! symbols {
                                 Ok(n)
                             },
                             None => {
-
+                                Err(LexError::UnsupportedNumber {
+                                    code: 3,
+                                    span: Span {
+                                        start:self.current_pos,
+                                        end:self.current_pos.shift(x),
+                                        path:self.path
+                                    },
+                                    recoverable: true
+                                })
                             }
                         }
                     },
