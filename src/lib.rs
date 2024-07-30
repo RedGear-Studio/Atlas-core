@@ -2,6 +2,9 @@
  * atlas-core by Gipson62
  *
  * The core of a tool designed to help you make programming language
+ * 
+ * There will be a lexer macro that build up a fully fledged lexer for you with no efforts.
+ * It's currently in development, more information coming soon
 */
 
 //#![warn(missing_docs)]

@@ -102,6 +102,7 @@ impl fmt::Display for Span {
     }
 }
 
+/// WARNING: LineInformation need a huge rework as it's not working well at all
 pub struct LineInformation {
     pub line_number: usize,
     pub column_number: usize,
