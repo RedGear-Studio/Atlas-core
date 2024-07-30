@@ -229,7 +229,10 @@ impl Display for LexError {
 
 #[macro_export]
 macro_rules! keyword {
-    ($($x:literal),*) => {    
+    ($($x:literal),*) => {
+        use crate::map;
+        use internment::Intern;
+        use TokenKind;
         fn populate_keyword(&mut self) {
             self.keywords = map! {
                 $(
@@ -239,6 +242,7 @@ macro_rules! keyword {
         }
     };
     () => {
+        use crate::map;
         fn populate_keyword(&mut self) {
             self.keywords = map!();
         }
@@ -250,6 +254,9 @@ macro_rules! keyword {
 /// NB: the order could do the trick for now, like putting "<=" before "<" should work, but it's only a temporary fix
 macro_rules! symbols {
     ($($sym:literal => $variant:ident),* ) => {
+        use crate::utils::{Spanned, Span};
+        use crate::lexer::{LexError, Lexer};
+        use internment::Intern;
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
@@ -377,6 +384,7 @@ macro_rules! symbols {
 #[macro_export]
 macro_rules! number {
     (enable_f64: $f64:expr, enable_i64: $i64:expr) => {
+        use crate::lexer::{TokenKind, Token, Literal}
         fn number(&mut self, c: char) -> Option<TokenKind> {
             let mut number = String::new();
             number.push(c);
