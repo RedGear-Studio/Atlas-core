@@ -3,7 +3,7 @@
 #[macro_export]
 macro_rules! lexer {
     () => {
-use crate::utils::span::*;
+use atlas_core::utils::span::*;
 use internment::Intern;
 use std::{collections::HashMap, fmt::Display, iter::Peekable, str::Chars};
 
@@ -226,6 +226,7 @@ macro_rules! keyword {
     ($($x:literal),* $(,)?) => {
         impl Lexer<'_> {
             fn populate_keyword(&mut self) {
+                use atlas_core::map;
                 self.keywords = map! {
                     $(
                         Intern::new(String::from($x)) => TokenKind::Keyword(Intern::new(String::from($x))),
@@ -235,7 +236,7 @@ macro_rules! keyword {
         }
     };
     () => {
-        use crate::map;
+        use atlas_core::map;
         impl Lexer {
             fn populate_keyword(&mut self) {
                 self.keywords = map!();

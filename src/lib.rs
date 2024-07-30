@@ -39,8 +39,3 @@ macro_rules! map {
         }
     }
 }
-
-lexer!();
-number!(enable_f64: true, enable_i64: true);
-symbols!('$' => DollarSign, '#' => HashTag);
-keyword!("section");
