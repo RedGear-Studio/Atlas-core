@@ -39,7 +39,7 @@ impl Span {
     /// Creates a new `Span` without bounds checking.
     /// # Safety
     /// It's the caller's responsibility to ensure that `start` and `end` are valid
-    pub unsafe fn new_unchecked(start: usize, end:  usize, path: &'static str) -> Self {
+    pub unsafe fn new_unchecked(start: usize, end: usize, path: &'static str) -> Self {
         Span {
             start: BytePos(start),
             end: BytePos(end),
@@ -61,13 +61,16 @@ impl Span {
     pub fn union_span(self, other: Self) -> Self {
         use std::cmp;
         if self.path != other.path {
-            panic!("Cannot union spans from different files: {} and {}", self.path, other.path);
+            panic!(
+                "Cannot union spans from different files: {} and {}",
+                self.path, other.path
+            );
         }
         Span {
             start: cmp::min(self.start, other.start),
             end: cmp::max(self.end, other.end),
             path: self.path,
-        }        
+        }
     }
 
     /// Retrieves line information associated with the span.
@@ -76,8 +79,14 @@ impl Span {
         let end_byte = self.end.0;
         let content = std::fs::read_to_string(self.path).expect("Unable to read file");
         // Find the start and end of the line containing the span's start position
-        let line_start = content[..start_byte].rfind('\n').map(|idx| idx + 1).unwrap_or(0);
-        let line_end = content[end_byte..].find('\n').map(|idx| end_byte + idx).unwrap_or(end_byte);
+        let line_start = content[..start_byte]
+            .rfind('\n')
+            .map(|idx| idx + 1)
+            .unwrap_or(0);
+        let line_end = content[end_byte..]
+            .find('\n')
+            .map(|idx| end_byte + idx)
+            .unwrap_or(end_byte);
 
         let line_text = content[line_start..=(line_end - 1)].to_owned();
         let line_number = content[..start_byte].chars().filter(|&c| c == '\n').count() + 1;
@@ -111,7 +120,11 @@ impl LineInformation {
 
 impl fmt::Display for LineInformation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{}:\n {}", self.line_number, self.column_number, self.line_text)
+        write!(
+            f,
+            "{}:{}:\n {}",
+            self.line_number, self.column_number, self.line_text
+        )
     }
 }
 
