@@ -7,7 +7,7 @@
  * It's currently in development, more information coming soon
 */
 
-#![warn(missing_docs)]
+#![warn(missing_docs, unused)]
 
 //! # atlas-Core
 //!
