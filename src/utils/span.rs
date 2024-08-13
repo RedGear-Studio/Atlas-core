@@ -149,21 +149,23 @@ impl fmt::Display for LineInformation {
 /// # Example
 /// 
 /// ```
-/// use atlas_core::utils::span::Spanned;
+/// use atlas_core::utils::span::{Spanned, Span, BytePos};
 /// 
 /// struct Token {
 ///     span: Span,
 /// }
 /// 
-/// impl Spanned for Token {
-///     fn span(&self) -> Span {
-///         self.span
-///     }
-/// }
-/// 
-/// let token = Token { span: Span { start: (5, 0), end: (10, 0) } };
+/// # impl Spanned for Token {
+/// #     fn span(&self) -> Span {
+/// #         self.span
+/// #     }
+/// # }
+/// # unsafe {
+/// //NB: "new_unchecked(usize, usize, char)" is an unsafe function, it's only used here as an example
+/// let token = Token { span: Span::new_unchecked(5, 10, "[")};
 /// assert_eq!(token.start(), 5);
 /// assert_eq!(token.end(), 10);
+/// # }
 /// ```
 pub trait Spanned {
     /// Returns the `Span` representing the start and end positions of the object.

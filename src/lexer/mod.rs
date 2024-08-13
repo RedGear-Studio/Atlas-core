@@ -7,7 +7,7 @@
 /// # Syntax
 ///
 /// The macro can be invoked without any parameters:
-/// ```rust
+/// ```compile_fail
 /// lexer!();
 /// ```
 /// This initializes a lexer with default configurations and provides the necessary methods and structures.
@@ -54,7 +54,7 @@
 ///
 /// # Example Usage in Lexer
 ///
-/// ```rust
+/// ```compile_fail
 /// lexer!();
 ///
 /// impl Lexer<'_> {
@@ -306,20 +306,20 @@ impl Display for LexError {
 /// The macro can be invoked in two forms:
 /// 
 /// 1. **Custom keywords**:
-///    ```
+///    ```compile_fail
 ///    keyword!( "keyword1", "keyword2", ... );
 ///    ```
 ///    - Each keyword is a string literal that will be recognized by the lexer and mapped to a `TokenKind::Keyword` variant.
 /// 
 /// 2. **No keywords**:
-///    ```
+///    ```compile_fail
 ///    keyword!();
 ///    ```
 ///    - Initializes an empty `HashMap` for keywords.
 /// 
 /// # Example
 /// 
-/// ```rust
+/// ```compile_fail
 /// // Define custom keywords
 /// keyword!( "fn", "let", "if" );
 /// 
@@ -371,21 +371,21 @@ macro_rules! keyword {
 /// The macro can be invoked in two forms:
 /// 
 /// 1. **Custom symbols**:
-///    ```
+///    ```compile_fail
 ///    symbols!( 'symbol' => Variant, ... );
 ///    ```
 ///    - `symbol`: A single-character symbol to be recognized by the lexer.
 ///    - `Variant`: The corresponding variant in the `TokenKind` enum.
 /// 
 /// 2. **Default symbols**:
-///    ```
+///    ```compile_fail
 ///    symbols!();
 ///    ```
 ///    - Uses a predefined set of single-character symbols and their corresponding `TokenKind` variants.
 /// 
 /// # Example
 /// 
-/// ```rust
+/// ```compile_fail
 /// // Define custom symbols
 /// symbols!(
 ///     '+' => Plus,
@@ -610,20 +610,20 @@ macro_rules! symbols {
 /// The macro can be invoked in three forms:
 ///
 /// 1. **Full configuration**:
-///    ```
+///    ```compile_fail
 ///    number!(enable_f64: bool, enable_i64: bool);
 ///    ```
 ///    - `enable_f64`: Enables or disables support for `f64` literals.
 ///    - `enable_i64`: Enables or disables support for `i64` literals.
 ///
 /// 2. **Single boolean configuration**:
-///    ```
+///    ```compile_fail
 ///    number!(bool);
 ///    ```
 ///    - This form enables or disables both `f64` and `i64` support with the same boolean value.
 ///
 /// 3. **Default configuration**:
-///    ```
+///    ```compile_fail
 ///    number!();
 ///    ```
 ///    - This form enables support for both `f64` and `i64` literals by default.

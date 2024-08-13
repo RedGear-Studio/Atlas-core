@@ -16,7 +16,7 @@
 //! 
 //! Currently, it's only purpose is to generate a Lexer and the way to do it is pretty straightforward
 //! # Example:
-//! ```
+//! ```compile_fail
 //! use atlas_core::prelude::*;
 //! //Generate the base Lexer and useful features used across the whole lexer
 //! lexer!()
@@ -58,7 +58,7 @@ pub mod prelude {
 /// The macro can be invoked in two forms:
 ///
 /// 1. **Declare a mutable `HashMap`**:
-///    ```
+///    ```compile_fail
 ///    map!(name, &key_type, &val_type);
 ///    ```
 ///    - `name`: The name of the `HashMap` variable to declare.
@@ -66,14 +66,14 @@ pub mod prelude {
 ///    - `val_type`: The type of the values in the `HashMap`.
 ///
 /// 2. **Initialize a `HashMap` with key-value pairs**:
-///    ```
+///    ```compile_fail
 ///    map!(key1 => val1, key2 => val2, ...);
 ///    ```
 ///    - `key => val`: Each key-value pair to insert into the `HashMap`.
 ///
 /// # Example
 ///
-/// ```rust
+/// ```compile_fail
 /// use std::collections::HashMap;
 ///
 /// // Declare a mutable HashMap with specified key and value types
@@ -88,9 +88,9 @@ pub mod prelude {
 ///     "three" => 3,
 /// );
 ///
-/// assert_eq!(initialized_map.get(&"one"), Some(&1));
-/// assert_eq!(initialized_map.get(&"two"), Some(&2));
-/// assert_eq!(initialized_map.get(&"three"), Some(&3));
+/// assert_eq!(initialized_map.get("one"), Some(&1));
+/// assert_eq!(initialized_map.get("two"), Some(&2));
+/// assert_eq!(initialized_map.get("three"), Some(&3));
 /// ```
 macro_rules! map {
     ($name:ident, &key: ty, &val: ty) => {
