@@ -1,7 +1,7 @@
 use heck::*;
 
 /// The `Case` trait defines methods for checking the naming convention of identifiers.
-/// 
+///
 /// NB: It's already implemented in ``String`` and ``&str`` by default, so you don't need to implement it yourself.
 pub trait Case {
     /// Checks if an identifier follows the snake_case naming convention.
@@ -71,5 +71,5 @@ impl Case for &str {
     #[inline(always)]
     fn is_shouty_snake_case(&mut self) -> bool {
         self.to_shouty_snake_case() == *self
-    }   
+    }
 }
