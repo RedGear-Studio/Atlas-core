@@ -1,6 +1,6 @@
 [package]
 name = "atlas-core"
-version = "0.4.6"
+version = "0.5.4"
 authors = ["Gipson62 <j.h.gipson62@gmail.com>"]
 description = "(In Alpha) Embeddable functional programming language"
 keywords = ["language", "tool", "programming-language", "language-agnostic"]
@@ -15,4 +15,4 @@ name = "atlas_core"
 
 [dependencies]
 heck = "0.5.0"
-internment = "0.7.4"
+internment = "0.8.4"
