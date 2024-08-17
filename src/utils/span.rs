@@ -24,6 +24,20 @@ impl fmt::Display for BytePos {
     }
 }
 
+impl From<usize> for BytePos {
+    fn from(value: usize) -> Self {
+        BytePos(value)
+    }
+}
+
+impl Into<usize> for BytePos {
+    fn into(self) -> usize {
+        match self {
+            BytePos(b) => b
+        }
+    }
+}
+
 /// Represents a span in a source file, defined by a start and end byte position.
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Default)]
 pub struct Span {

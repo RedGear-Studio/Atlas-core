@@ -1,3 +1,4 @@
+mod test_lexer;
 /// A macro to define and initialize a lexer with default or customized configurations.
 ///
 /// This macro generates the `Lexer` struct and implements necessary methods and error handling 
