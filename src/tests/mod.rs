@@ -1,10 +1,9 @@
-
 #[cfg(test)]
 mod tests {
     #[test]
     fn hehe() {
         use crate::prelude::*;
-        lexer_builder!();
+        lexer_builder!(ignore_space: true);
         symbols!();
         keywords!("and");
         let mut lexer = AtlasLexer::default();

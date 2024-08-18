@@ -90,7 +90,7 @@ pub mod lexer_state;
 /// - Error handling is rudimentary and will need to be extended based on the specific requirements of the lexer.
 #[macro_export]
 macro_rules! lexer_builder {
-    () => {
+    (ignore_space: $ignore:literal) => {
         #[derive(Debug, Default)]
         pub struct AtlasLexer {
             sys: Vec<fn(char, &mut LexerState) -> Option<Token>>,
@@ -102,7 +102,11 @@ macro_rules! lexer_builder {
             //The default should only add the existing default system => find a way to do it correctly :thinking:
             pub fn default() -> Self {
                 let mut lexer = AtlasLexer::new("<stdin>", String::new());
-                lexer.add_system(default_number).add_system(default_symbol).add_system(default_keyword);
+                lexer
+                    .add_system(default_number)
+                    .add_system(default_symbol)
+                    .add_system(default_keyword)
+                    .add_system(default_whitespace);
                 lexer
             }
             pub fn new(path: &'static str, source: String) -> Self {
@@ -135,6 +139,14 @@ macro_rules! lexer_builder {
             //A way of handling errors will come later
             pub fn tokenize(&mut self) -> Result<Vec<Token>, ()> {
                 let mut tok: Vec<Token> = vec![];
+                tok.push(Token::new(
+                    Span {
+                        start: self.current_pos,
+                        end: self.current_pos,
+                        path: self.path,
+                    },
+                    TokenKind::SoI,
+                ));
                 loop {
                     let ch = self.source.chars().nth(usize::from(self.current_pos));
                     match ch {
@@ -144,13 +156,24 @@ macro_rules! lexer_builder {
                                 self.source
                                     .get(usize::from(self.current_pos)..self.source.len())
                                     .unwrap(),
+                                self.path,
                             );
                             let mut counter = 0;
                             for f in &self.sys {
                                 let mut current_state = state.clone();
                                 match f(c, &mut current_state) {
                                     Some(f) => {
-                                        tok.push(f);
+                                        if $ignore {
+                                            match f.kind() {
+                                                TokenKind::WhiteSpace => {}
+                                                TokenKind::CarriageReturn => {}
+                                                TokenKind::NewLine => {}
+                                                TokenKind::Tabulation => {}
+                                                _ => tok.push(f),
+                                            }
+                                        } else {
+                                            tok.push(f);
+                                        }
                                         self.current_pos = current_state.current_pos;
                                         break;
                                     }
@@ -161,14 +184,20 @@ macro_rules! lexer_builder {
                                 }
                             }
                             if counter >= self.sys.len() {
-                                println!("there might be an issue");
-                                self.current_pos = self.current_pos.shift_by(1);
-                                //return Err(());
+                                return Err(());
                             }
                         }
                         None => break,
                     }
                 }
+                tok.push(Token::new(
+                    Span {
+                        start: self.current_pos,
+                        end: self.current_pos,
+                        path: self.path,
+                    },
+                    TokenKind::EoI,
+                ));
                 return Ok(tok);
             }
         }
@@ -212,13 +241,32 @@ macro_rules! lexer_builder {
                     Span {
                         start,
                         end: state.current_pos,
-                        path: "<stdin>",
+                        path: state.path,
                     },
                     TokenKind::Literal(Literal::Float(n.parse::<f64>().unwrap())),
                 ))
             } else {
                 None
             }
+        }
+        fn default_whitespace(c: char, state: &mut LexerState) -> Option<Token> {
+            let start = state.current_pos;
+            let tok = match c {
+                ' ' => TokenKind::WhiteSpace,
+                '\t' => TokenKind::Tabulation,
+                '\n' => TokenKind::NewLine,
+                '\r' => TokenKind::CarriageReturn,
+                _ => return None,
+            };
+            state.next();
+            return Some(Token::new(
+                Span {
+                    start,
+                    end: state.current_pos,
+                    path: state.path,
+                },
+                tok,
+            ))
         }
     };
 }
@@ -443,6 +491,10 @@ macro_rules! symbols {
             $(
                 $variant,
             )*
+            WhiteSpace,
+            NewLine,
+            Tabulation,
+            CarriageReturn,
             EoI,
             SoI
         }
@@ -460,7 +512,7 @@ macro_rules! symbols {
                 Span {
                     start,
                     end: state.current_pos,
-                    path: "<stdin>",
+                    path: state.path,
                 },
                 tok,
             ))
@@ -534,7 +586,7 @@ macro_rules! keywords {
                     Some(Token::new(Span {
                         start,
                         end: state.current_pos,
-                        path: "<stdin>"
+                        path: state.path
                     }, *k))
                 } else {
                     return None;

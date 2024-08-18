@@ -31,18 +31,18 @@
 
 /// Contain a suite of macros to generate a fully fledge lexer tailored to the user needs
 pub mod lexer;
+mod tests;
 /// TODO
 pub mod utils;
-mod tests;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
+    pub use crate::keywords;
     pub use crate::lexer;
     pub use crate::lexer::lexer_state::LexerState;
     pub use crate::lexer_builder;
     pub use crate::map;
     pub use crate::symbols;
-    pub use crate::keywords;
     pub use crate::utils::{case::Case, span::*};
     pub use internment::Intern;
 }
