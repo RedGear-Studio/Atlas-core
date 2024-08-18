@@ -1,5 +1,5 @@
-use std::{iter::Peekable, str::Chars};
 use crate::prelude::*;
+use std::{iter::Peekable, str::Chars};
 
 /// `LexerState` represents the state of the lexer during the process of
 /// tokenizing a source string. It keeps track of the current position within
@@ -32,7 +32,7 @@ impl<'lex> LexerState<'lex> {
     pub fn new(current_pos: BytePos, txt: &'lex str) -> Self {
         Self {
             current_pos,
-            txt: txt.chars().peekable(),  // Convert the string to a `Chars` iterator and wrap it in `Peekable`.
+            txt: txt.chars().peekable(), // Convert the string to a `Chars` iterator and wrap it in `Peekable`.
         }
     }
 
@@ -43,8 +43,8 @@ impl<'lex> LexerState<'lex> {
     /// - `Some(char)`: The next character if one exists.
     /// - `None`: If the iterator has reached the end of the source string.
     pub fn next(&mut self) -> Option<char> {
-        self.current_pos = self.current_pos.shift_by(1);  // Shift the position by one byte.
-        self.txt.next()  // Return the next character from the iterator.
+        self.current_pos = self.current_pos.shift_by(1); // Shift the position by one byte.
+        self.txt.next() // Return the next character from the iterator.
     }
 
     /// Peeks at the next character in the source string without advancing the iterator.
@@ -56,6 +56,6 @@ impl<'lex> LexerState<'lex> {
     /// Peeking allows lookahead operations, which are often necessary in lexical analysis
     /// to decide how to parse the next tokens without consuming them.
     pub fn peek(&mut self) -> Option<&char> {
-        self.txt.peek()  // Return a reference to the next character without advancing.
+        self.txt.peek() // Return a reference to the next character without advancing.
     }
 }

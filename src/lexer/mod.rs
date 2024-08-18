@@ -99,9 +99,10 @@ macro_rules! lexer_builder {
             pub source: String,
         }
         impl AtlasLexer {
+            //The default should only add the existing default system => find a way to do it correctly :thinking:
             pub fn default() -> Self {
                 let mut lexer = AtlasLexer::new("<stdin>", String::new());
-                lexer.add_system(default_number).add_system(default_symbol);
+                lexer.add_system(default_number).add_system(default_symbol).add_system(default_keyword);
                 lexer
             }
             pub fn new(path: &'static str, source: String) -> Self {
@@ -160,7 +161,9 @@ macro_rules! lexer_builder {
                                 }
                             }
                             if counter >= self.sys.len() {
-                                return Err(());
+                                println!("there might be an issue");
+                                self.current_pos = self.current_pos.shift_by(1);
+                                //return Err(());
                             }
                         }
                         None => break,
@@ -217,67 +220,10 @@ macro_rules! lexer_builder {
                 None
             }
         }
-        fn default_symbol(c: char, state: &mut LexerState) -> Option<Token> {
-            let start = state.current_pos;
-            let tok = match c {
-                '+' => TokenKind::Plus,
-                '-' => TokenKind::Minus,
-                '*' => TokenKind::Asterisk,
-                '/' => TokenKind::Slash,
-                '%' => TokenKind::Percent,
-                '=' => TokenKind::Equal,
-                //'==' => EqualEqual,
-                //'!=' => NotEqual,
-                '<' => TokenKind::LessThan,
-                '>' => TokenKind::GreaterThan,
-                //'<=' => LessThanEqual,
-                //'>=' => GreaterThanEqual,
-                '!' => TokenKind::Exclamation,
-                '&' => TokenKind::Ampersand,
-                //'&&' => DoubleAmpersand,
-                '|' => TokenKind::Pipe,
-                //'||' => DoublePipe,
-                '^' => TokenKind::Caret,
-                '~' => TokenKind::Tilde,
-                //'<<' => LeftShift,
-                //'>>' => RightShift,
-                '(' => TokenKind::LeftParen,
-                ')' => TokenKind::RightParen,
-                '[' => TokenKind::LeftBracket,
-                ']' => TokenKind::RightBracket,
-                '{' => TokenKind::LeftBrace,
-                '}' => TokenKind::RightBrace,
-                '.' => TokenKind::Dot,
-                //'..' => DoubleDot,
-                //'...' => Ellipsis,
-                ',' => TokenKind::Comma,
-                ';' => TokenKind::Semicolon,
-                ':' => TokenKind::Colon,
-                //'::' => DoubleColon,
-                '?' => TokenKind::Question,
-                '#' => TokenKind::Hash,
-                '$' => TokenKind::Dollar,
-                '@' => TokenKind::At,
-                '\\' => TokenKind::Backslash,
-                '\'' => TokenKind::SingleQuote,
-                '"' => TokenKind::DoubleQuote,
-                '`' => TokenKind::Backtick,
-                _ => return None,
-            };
-            state.next();
-            Some(Token::new(
-                Span {
-                    start,
-                    end: state.current_pos,
-                    path: "<stdin>",
-                },
-                tok,
-            ))
-        }
     };
 }
-//A macro for defining the `TokenKind` enum and related types, including predefined symbols 
-/// and operators. The macro allows for flexible creation of the `TokenKind` variants based 
+/// A macro for defining the `TokenKind` enum and related types, including predefined symbols
+/// and operators. The macro allows for flexible creation of the `TokenKind` variants based
 /// on character literals and maps them to specific enum variants.
 ///
 /// # Overview
@@ -295,7 +241,7 @@ macro_rules! lexer_builder {
 /// The macro can be invoked in two ways:
 ///
 /// 1. **With Symbol-Variant Pairs:**
-/// 
+///
 ///    This usage defines specific character literals as symbols and maps them to corresponding
 ///    variants in the `TokenKind` enum.
 ///
@@ -334,7 +280,7 @@ macro_rules! lexer_builder {
 ///        '`' => Backtick
 ///    }
 ///    ```
-/// 
+///
 ///    This expands into the `TokenKind` enum with the specified variants for each symbol:
 ///
 ///    ```compile_fail
@@ -379,14 +325,14 @@ macro_rules! lexer_builder {
 ///    ```
 ///
 /// 2. **Default Symbol Set:**
-/// 
+///
 ///    If no arguments are passed, the macro defaults to a predefined set of commonly used symbols
 ///    and operators, generating corresponding `TokenKind` variants for each.
 ///
 ///    ```compile_fail
 ///    symbols!();
 ///    ```
-/// 
+///
 ///    This generates the same `TokenKind` enum as shown in the example above.
 ///
 /// # Generated Types:
@@ -432,7 +378,7 @@ macro_rules! lexer_builder {
 ///
 /// ```compile_fail
 /// symbols!();
-/// 
+///
 /// fn main() {
 ///     // Example usage of the generated TokenKind variants.
 ///     let plus_token = Token::new(Span::new(0, 1), TokenKind::Plus);
@@ -448,7 +394,7 @@ macro_rules! lexer_builder {
 ///   allows for full customization if needed.
 #[macro_export]
 macro_rules! symbols {
-    ($($sym:literal => $variant:ident),* ) => {
+    ($($sym:literal => $variant:ident),+ ) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
@@ -500,7 +446,25 @@ macro_rules! symbols {
             EoI,
             SoI
         }
-
+        //TODO: add support for multi-char symbols
+        fn default_symbol(c: char, state: &mut LexerState) -> Option<Token> {
+            let start = state.current_pos;
+            let tok = match c {
+                $(
+                    $sym => TokenKind::$variant,
+                )*
+                _ => return None,
+            };
+            state.next();
+            Some(Token::new(
+                Span {
+                    start,
+                    end: state.current_pos,
+                    path: "<stdin>",
+                },
+                tok,
+            ))
+        }
     };
     () => {
         symbols!{
@@ -510,21 +474,13 @@ macro_rules! symbols {
             '/' => Slash,
             '%' => Percent,
             '=' => Equal,
-            //'==' => EqualEqual,
-            //'!=' => NotEqual,
             '<' => LessThan,
             '>' => GreaterThan,
-            //'<=' => LessThanEqual,
-            //'>=' => GreaterThanEqual,
             '!' => Exclamation,
             '&' => Ampersand,
-            //'&&' => DoubleAmpersand,
             '|' => Pipe,
-            //'||' => DoublePipe,
             '^' => Caret,
             '~' => Tilde,
-            //'<<' => LeftShift,
-            //'>>' => RightShift,
             '(' => LeftParen,
             ')' => RightParen,
             '[' => LeftBracket,
@@ -532,12 +488,9 @@ macro_rules! symbols {
             '{' => LeftBrace,
             '}' => RightBrace,
             '.' => Dot,
-            //'..' => DoubleDot,
-            //'...' => Ellipsis,
             ',' => Comma,
             ';' => Semicolon,
             ':' => Colon,
-            //'::' => DoubleColon,
             '?' => Question,
             '#' => Hash,
             '$' => Dollar,
@@ -546,73 +499,49 @@ macro_rules! symbols {
             '\'' => SingleQuote,
             '"' => DoubleQuote,
             '`' => Backtick
-        };
-    }
+        }
+    };
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn hehe() {
-        use crate::prelude::*;
-        lexer_builder!();
-        symbols! {
-            '+' => Plus,
-            '-' => Minus,
-            '*' => Asterisk,
-            '/' => Slash,
-            '%' => Percent,
-            '=' => Equal,
-            //'==' => EqualEqual,
-            //'!=' => NotEqual,
-            '<' => LessThan,
-            '>' => GreaterThan,
-            //'<=' => LessThanEqual,
-            //'>=' => GreaterThanEqual,
-            '!' => Exclamation,
-            '&' => Ampersand,
-            //'&&' => DoubleAmpersand,
-            '|' => Pipe,
-            //'||' => DoublePipe,
-            '^' => Caret,
-            '~' => Tilde,
-            //'<<' => LeftShift,
-            //'>>' => RightShift,
-            '(' => LeftParen,
-            ')' => RightParen,
-            '[' => LeftBracket,
-            ']' => RightBracket,
-            '{' => LeftBrace,
-            '}' => RightBrace,
-            '.' => Dot,
-            //'..' => DoubleDot,
-            //'...' => Ellipsis,
-            ',' => Comma,
-            ';' => Semicolon,
-            ':' => Colon,
-            //'::' => DoubleColon,
-            '?' => Question,
-            '#' => Hash,
-            '$' => Dollar,
-            '@' => At,
-            '\\' => Backslash,
-            '\'' => SingleQuote,
-            '"' => DoubleQuote,
-            '`' => Backtick
-        };
-        let mut lexer = AtlasLexer::default();
-        lexer
-            .set_path("<stdin>")
-            .set_source(String::from("256245.325,;25{}"));
-        match lexer.tokenize() {
-            Ok(toks) => {
-                for t in toks {
-                    println!("{:?}", t);
+/// To be done
+#[macro_export]
+macro_rules! keywords {
+    ($($x:literal),* $(,)?) => {
+        use std::collections::HashMap;
+        fn default_keyword(c: char, state: &mut LexerState) -> Option<Token> {
+            let start = state.current_pos;
+            let mut s = String::new();
+            if c.is_alphabetic() {
+                s.push(c);
+                state.next();
+                let keywords: HashMap<Intern<String>, TokenKind> = map! {
+                    $(
+                        Intern::new(String::from($x)) => TokenKind::Keyword(Intern::new(String::from($x))),
+                    )*
+                };
+                loop {
+                    if let Some(c) = state.peek() {
+                        if c.is_alphabetic() {
+                            s.push(*c);
+                            state.next();
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-            }
-            Err(e) => {
-                println!("Sale batard {:?}", e);
+                if let Some(k) = keywords.get(&Intern::new(s)) {
+                    Some(Token::new(Span {
+                        start,
+                        end: state.current_pos,
+                        path: "<stdin>"
+                    }, *k))
+                } else {
+                    return None;
+                }
+            } else {
+                None
             }
         }
-    }
+    };
 }

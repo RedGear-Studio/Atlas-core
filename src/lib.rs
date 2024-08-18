@@ -33,6 +33,7 @@
 pub mod lexer;
 /// TODO
 pub mod utils;
+mod tests;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
@@ -41,6 +42,7 @@ pub mod prelude {
     pub use crate::lexer_builder;
     pub use crate::map;
     pub use crate::symbols;
+    pub use crate::keywords;
     pub use crate::utils::{case::Case, span::*};
     pub use internment::Intern;
 }
