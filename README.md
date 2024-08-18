@@ -19,11 +19,13 @@ Add the following to your ``Cargo.toml``:
 ```toml
 
 [dependencies]
-atlas_core = "0.1.0"
+atlas_core = "0.6.0"
 ```
 
 # Usage
 ## Defining Symbols
+
+> Everything is under refactoring, so it won't work like that. Stay tuned for update!
 
 Use the ``symbols!`` macro to define symbols used in your language:
 

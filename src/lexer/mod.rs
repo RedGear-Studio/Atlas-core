@@ -2,10 +2,8 @@
 pub mod lexer_state;
 /// Lay the foundation for the new lexer
 #[macro_export]
-macro_rules! hehe {
+macro_rules! lexer_builder {
     () => {
-        use crate::{lexer::lexer_state::LexerState, utils::span::*};
-        use internment::Intern;
         #[derive(Debug, Default)]
         pub struct AtlasLexer {
             sys: Vec<fn(char, &mut LexerState) -> Option<Token>>,
@@ -16,8 +14,7 @@ macro_rules! hehe {
         impl AtlasLexer {
             pub fn default() -> Self {
                 let mut lexer = AtlasLexer::new("<stdin>", String::new());
-                lexer.add_system(default_number);
-                //.add_system(default_symbol);
+                lexer.add_system(default_number).add_system(default_symbol);
                 lexer
             }
             pub fn new(path: &'static str, source: String) -> Self {
@@ -54,7 +51,12 @@ macro_rules! hehe {
                     let ch = self.source.chars().nth(usize::from(self.current_pos));
                     match ch {
                         Some(c) => {
-                            let state = LexerState::new(self.current_pos, self.source.as_str());
+                            let state = LexerState::new(
+                                self.current_pos,
+                                self.source
+                                    .get(usize::from(self.current_pos)..self.source.len())
+                                    .unwrap(),
+                            );
                             let mut counter = 0;
                             for f in &self.sys {
                                 let mut current_state = state.clone();
@@ -128,16 +130,11 @@ macro_rules! hehe {
                 None
             }
         }
-        fn default_symbol(c: char, state: &mut LexerState) -> Option<Token> {
-            todo!()
-        }
     };
 }
-//crate::tmp_symbols!();
-
 /// Temporary symbol macro
 #[macro_export]
-macro_rules! tmp_symbols {
+macro_rules! symbols {
     ($($sym:literal => $variant:ident),* ) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
@@ -236,7 +233,7 @@ macro_rules! tmp_symbols {
             '\'' => SingleQuote,
             '"' => DoubleQuote,
             '`' => Backtick
-        }
+        };
     }
 }
 
@@ -244,12 +241,56 @@ macro_rules! tmp_symbols {
 mod tests {
     #[test]
     fn hehe() {
-        crate::hehe!();
-        crate::tmp_symbols!();
+        use crate::prelude::*;
+        lexer_builder!();
+        symbols! {
+            '+' => Plus,
+            '-' => Minus,
+            '*' => Asterisk,
+            '/' => Slash,
+            '%' => Percent,
+            '=' => Equal,
+            //'==' => EqualEqual,
+            //'!=' => NotEqual,
+            '<' => LessThan,
+            '>' => GreaterThan,
+            //'<=' => LessThanEqual,
+            //'>=' => GreaterThanEqual,
+            '!' => Exclamation,
+            '&' => Ampersand,
+            //'&&' => DoubleAmpersand,
+            '|' => Pipe,
+            //'||' => DoublePipe,
+            '^' => Caret,
+            '~' => Tilde,
+            //'<<' => LeftShift,
+            //'>>' => RightShift,
+            '(' => LeftParen,
+            ')' => RightParen,
+            '[' => LeftBracket,
+            ']' => RightBracket,
+            '{' => LeftBrace,
+            '}' => RightBrace,
+            '.' => Dot,
+            //'..' => DoubleDot,
+            //'...' => Ellipsis,
+            ',' => Comma,
+            ';' => Semicolon,
+            ':' => Colon,
+            //'::' => DoubleColon,
+            '?' => Question,
+            '#' => Hash,
+            '$' => Dollar,
+            '@' => At,
+            '\\' => Backslash,
+            '\'' => SingleQuote,
+            '"' => DoubleQuote,
+            '`' => Backtick
+        };
         let mut lexer = AtlasLexer::default();
         lexer
             .set_path("<stdin>")
-            .set_source(String::from("256245.325"));
+            .set_source(String::from("256245.325,;25{}"));
         match lexer.tokenize() {
             Ok(toks) => {
                 for t in toks {
@@ -259,6 +300,63 @@ mod tests {
             Err(e) => {
                 println!("Sale batard {:?}", e);
             }
+        }
+        fn default_symbol(c: char, state: &mut LexerState) -> Option<Token> {
+            let start = state.current_pos;
+            let tok = match c {
+                '+' => TokenKind::Plus,
+                '-' => TokenKind::Minus,
+                '*' => TokenKind::Asterisk,
+                '/' => TokenKind::Slash,
+                '%' => TokenKind::Percent,
+                '=' => TokenKind::Equal,
+                //'==' => EqualEqual,
+                //'!=' => NotEqual,
+                '<' => TokenKind::LessThan,
+                '>' => TokenKind::GreaterThan,
+                //'<=' => LessThanEqual,
+                //'>=' => GreaterThanEqual,
+                '!' => TokenKind::Exclamation,
+                '&' => TokenKind::Ampersand,
+                //'&&' => DoubleAmpersand,
+                '|' => TokenKind::Pipe,
+                //'||' => DoublePipe,
+                '^' => TokenKind::Caret,
+                '~' => TokenKind::Tilde,
+                //'<<' => LeftShift,
+                //'>>' => RightShift,
+                '(' => TokenKind::LeftParen,
+                ')' => TokenKind::RightParen,
+                '[' => TokenKind::LeftBracket,
+                ']' => TokenKind::RightBracket,
+                '{' => TokenKind::LeftBrace,
+                '}' => TokenKind::RightBrace,
+                '.' => TokenKind::Dot,
+                //'..' => DoubleDot,
+                //'...' => Ellipsis,
+                ',' => TokenKind::Comma,
+                ';' => TokenKind::Semicolon,
+                ':' => TokenKind::Colon,
+                //'::' => DoubleColon,
+                '?' => TokenKind::Question,
+                '#' => TokenKind::Hash,
+                '$' => TokenKind::Dollar,
+                '@' => TokenKind::At,
+                '\\' => TokenKind::Backslash,
+                '\'' => TokenKind::SingleQuote,
+                '"' => TokenKind::DoubleQuote,
+                '`' => TokenKind::Backtick,
+                _ => return None,
+            };
+            state.next();
+            Some(Token::new(
+                Span {
+                    start,
+                    end: state.current_pos,
+                    path: "<stdin>",
+                },
+                tok,
+            ))
         }
     }
 }

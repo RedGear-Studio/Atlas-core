@@ -37,10 +37,10 @@ pub mod utils;
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
     pub use crate::lexer;
-    pub use crate::map;
-    pub use crate::hehe;
-    pub use crate::tmp_symbols;
     pub use crate::lexer::lexer_state::LexerState;
+    pub use crate::lexer_builder;
+    pub use crate::map;
+    pub use crate::symbols;
     pub use crate::utils::{case::Case, span::*};
     pub use internment::Intern;
 }
