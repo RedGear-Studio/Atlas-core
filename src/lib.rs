@@ -2,7 +2,7 @@
  * atlas-core by Gipson62
  *
  * The core of a tool designed to help you make programming language
- * 
+ *
  * There will be a lexer macro that build up a fully fledged lexer for you with no efforts.
  * It's currently in development, more information coming soon
 */
@@ -13,7 +13,7 @@
 //!
 //! `atlas-core` is the foundational library for a language creation tool designed to assist users in developing languages.
 //! This core library currently serves as the building block for the creation of Atlas77, a functional programming language.
-//! 
+//!
 //! Currently, it's only purpose is to generate a Lexer and the way to do it is pretty straightforward
 //! # Example:
 //! ```compile_fail
@@ -36,17 +36,17 @@ pub mod utils;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
-    pub use crate::map;
     pub use crate::lexer;
-    pub use crate::symbols;
-    pub use crate::number;
-    pub use crate::keyword;
+    pub use crate::map;
+    pub use crate::hehe;
+    pub use crate::tmp_symbols;
+    pub use crate::lexer::lexer_state::LexerState;
+    pub use crate::utils::{case::Case, span::*};
     pub use internment::Intern;
-    pub use crate::utils::{span::*, case::Case};
 }
 
 #[macro_export]
-/// A macro to create and initialize a `HashMap` with specified key-value pairs or 
+/// A macro to create and initialize a `HashMap` with specified key-value pairs or
 /// to declare a mutable `HashMap` with specific key and value types.
 ///
 /// This macro provides two functionalities:

@@ -30,11 +30,9 @@ impl From<usize> for BytePos {
     }
 }
 
-impl Into<usize> for BytePos {
-    fn into(self) -> usize {
-        match self {
-            BytePos(b) => b
-        }
+impl From<BytePos> for usize {
+    fn from(value: BytePos) -> Self {
+        value.0
     }
 }
 
@@ -144,31 +142,31 @@ impl fmt::Display for LineInformation {
 }
 
 /// A trait representing an object that has an associated span in the source code.
-/// 
-/// This trait is used to obtain the span (range of positions) for a token or other 
-/// syntactic element. It provides methods to get the start and end positions 
+///
+/// This trait is used to obtain the span (range of positions) for a token or other
+/// syntactic element. It provides methods to get the start and end positions
 /// of the span.
-/// 
+///
 /// # Required Methods
-/// 
+///
 /// - `span(&self) -> Span`: Returns the `Span` representing the start and end positions of the object.
-/// 
+///
 /// # Provided Methods
-/// 
-/// - `start(&self) -> usize`: Returns the starting position of the span. 
+///
+/// - `start(&self) -> usize`: Returns the starting position of the span.
 ///   This method is implemented using the `span` method and returns the start position.
-/// - `end(&self) -> usize`: Returns the ending position of the span. 
+/// - `end(&self) -> usize`: Returns the ending position of the span.
 ///   This method is implemented using the `span` method and returns the end position.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use atlas_core::utils::span::{Spanned, Span, BytePos};
-/// 
+///
 /// struct Token {
 ///     span: Span,
 /// }
-/// 
+///
 /// # impl Spanned for Token {
 /// #     fn span(&self) -> Span {
 /// #         self.span
@@ -184,7 +182,7 @@ impl fmt::Display for LineInformation {
 pub trait Spanned {
     /// Returns the `Span` representing the start and end positions of the object.
     fn span(&self) -> Span;
-    /// Returns the starting position of the span. 
+    /// Returns the starting position of the span.
     fn start(&self) -> usize {
         self.span().start.0
     }
