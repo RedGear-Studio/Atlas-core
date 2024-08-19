@@ -269,6 +269,9 @@ macro_rules! lexer_builder {
             ))
         }
     };
+    () => {
+        lexer_builder!(ignore_space: true)
+    }
 }
 /// A macro for defining the `TokenKind` enum and related types, including predefined symbols
 /// and operators. The macro allows for flexible creation of the `TokenKind` variants based
