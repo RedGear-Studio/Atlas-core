@@ -270,7 +270,7 @@ macro_rules! lexer_builder {
         }
     };
     () => {
-        lexer_builder!(ignore_space: true)
+        lexer_builder!(ignore_space: true);
     }
 }
 /// A macro for defining the `TokenKind` enum and related types, including predefined symbols
@@ -554,7 +554,7 @@ macro_rules! symbols {
             '\'' => SingleQuote,
             '"' => DoubleQuote,
             '`' => Backtick
-        }
+        };
     };
 }
 /// To be done
