@@ -565,7 +565,7 @@ macro_rules! keywords {
         fn default_keyword(c: char, state: &mut LexerState) -> Option<Token> {
             let start = state.current_pos;
             let mut s = String::new();
-            if c.is_alphabetic() && c == '_' {
+            if c.is_alphabetic() || c == '_' {
                 s.push(c);
                 state.next();
                 let keywords: HashMap<Intern<String>, TokenKind> = map! {
@@ -575,7 +575,7 @@ macro_rules! keywords {
                 };
                 loop {
                     if let Some(c) = state.peek() {
-                        if c.is_alphabetic() && *c == '_' {
+                        if c.is_alphabetic() || *c == '_' {
                             s.push(*c);
                             state.next();
                         } else {
