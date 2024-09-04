@@ -210,28 +210,6 @@ macro_rules! tmp_lexer_builder {
     };
 }
 
-tmp_lexer_builder!(
-    DefaultSystem {
-        number: true,
-        symbol: true,
-        keyword: true,
-        whitespace: {
-            allow_them: true,
-            use_system: true,
-        },
-    },
-    Symbols {
-        '.' => DOT,
-    },
-    Keyword { "extern", },
-    Number {
-        trailing: true,
-        float: true,
-        u_int: true,
-        int: true
-    }
-);
-
 /// To be done
 #[macro_export]
 macro_rules! lexer_builder {
@@ -530,7 +508,7 @@ macro_rules! symbols {
             '\'' => SingleQuote,
             '"' => DoubleQuote,
             '`' => Backtick
-        };
+        }
     };
 }
 /// To be done
@@ -580,10 +558,28 @@ macro_rules! keywords {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_option_char() {
-        let hehe = Some('.');
-        if let Some('.') = hehe {
-            assert_eq!(hehe.unwrap(), '.');
-        }
+    fn test_macros() {
+        use crate::prelude::*;
+        tmp_lexer_builder!(
+            DefaultSystem {
+                number: true,
+                symbol: true,
+                keyword: true,
+                whitespace: {
+                    allow_them: true,
+                    use_system: true,
+                },
+            },
+            Symbols {
+                '.' => DOT,
+            },
+            Keyword { },
+            Number {
+                trailing: true,
+                float: true,
+                u_int: true,
+                int: true
+            }
+        );
     }
 }
