@@ -1,8 +1,8 @@
 /// TODO
 pub mod lexer_state;
-use crate::prelude::*;
 
-macro_rules! tmp_lexer_builder {
+#[macro_export]
+macro_rules! lexer_builder {
     (
         DefaultSystem {
             number: $number:literal,
@@ -20,14 +20,19 @@ macro_rules! tmp_lexer_builder {
             $($x:literal),* $(,)?
         },
         Number {
-            trailing: $trailing:literal,
+            trailing {
+                $($trail_name:literal => $trail_type:ty => $trail_enum:ident),+ $(,)?
+            },
             float: $float:literal,
             u_int: $u_int:literal,
             int: $int:literal $(,)?
         }$(,)?
     ) => {
-        crate::keywords!($($x,)*);
-        crate::symbols!($($sym => $variant,)*);
+        tokens!{
+            Symbol {$($sym => $variant,)*},
+            Number {$($trail_enum($trail_type),)*}
+        }
+        keywords!($($x,)*);
         pub type System = fn(char, &mut LexerState) -> Option<Token>;
         #[derive(Debug, Default)]
         pub struct AtlasLexer {
@@ -64,10 +69,7 @@ macro_rules! tmp_lexer_builder {
                 self
             }
 
-            pub fn add_system(
-                &mut self,
-                s: fn(char, &mut LexerState) -> Option<Token>,
-            ) -> &mut Self {
+            pub fn add_system(&mut self, s: fn(char, &mut LexerState) -> Option<Token>) -> &mut Self {
                 self.sys.push(s);
                 self
             }
@@ -137,7 +139,6 @@ macro_rules! tmp_lexer_builder {
                 return Ok(tok);
             }
         }
-        const TRAILING: [&str; 10] = if $trailing { ["_u8", "_u16", "_u32", "_u64", "_i8", "_i16", "_i32", "_i64", "_f32", "_f64"] } else { [""; 10] };
         fn default_number(c: char, state: &mut LexerState) -> Option<Token> {
             if c.is_numeric() {
                 let start = state.current_pos;
@@ -181,8 +182,8 @@ macro_rules! tmp_lexer_builder {
                         end: state.current_pos,
                         path: state.path,
                     },
-                    TokenKind::Literal(Literal::Float(n.parse::<f64>().unwrap())),
-                ))
+                    TokenKind::Literal(if is_float {Literal::Float(n.parse::<f64>().unwrap())} else {Literal::Int(n.parse::<i64>().unwrap())})),
+                )
             } else {
                 None
             }
@@ -210,7 +211,7 @@ macro_rules! tmp_lexer_builder {
     };
 }
 
-/// To be done
+/*/// To be done
 #[macro_export]
 macro_rules! lexer_builder {
     (ignore_space: $ignore:literal) => {
@@ -395,11 +396,10 @@ macro_rules! lexer_builder {
     () => {
         lexer_builder!(ignore_space: true);
     }
-}
+}*/
 /// To be done
-#[macro_export]
-macro_rules! symbols {
-    ($($sym:literal => $variant:ident),+ $(,)?) => {
+macro_rules! tokens {
+    (Symbol {$($sym:literal => $variant:ident),+ $(,)?}, Number {$($trail_enum:ident($trail_type:ty)),+ $(,)?}) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
@@ -426,8 +426,11 @@ macro_rules! symbols {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub enum Literal {
             ///Default int literal, may change in the parser based on the type of the variable
-            Int(i64),
 
+            Int(i64),
+            $(
+                $trail_enum($trail_type),
+            )+
             ///Default float literal, may change in the parser based on the type of the variable
             Float(f64),
 
@@ -512,7 +515,6 @@ macro_rules! symbols {
     };
 }
 /// To be done
-#[macro_export]
 macro_rules! keywords {
     ($($x:literal),* $(,)?) => {
         use std::collections::HashMap;
@@ -560,7 +562,7 @@ mod tests {
     #[test]
     fn test_macros() {
         use crate::prelude::*;
-        tmp_lexer_builder!(
+        lexer_builder!(
             DefaultSystem {
                 number: true,
                 symbol: true,
@@ -575,7 +577,7 @@ mod tests {
             },
             Keyword { },
             Number {
-                trailing: true,
+                trailing {"_i8" => i8 => I8},
                 float: true,
                 u_int: true,
                 int: true

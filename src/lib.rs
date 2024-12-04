@@ -15,21 +15,8 @@
 //! This core library currently serves as the building block for the creation of Atlas77, a functional programming language.
 //!
 //! Currently, it's only purpose is to generate a Lexer and the way to do it is pretty straightforward
-//! # Example:
-//! ```compile_fail
-//! use atlas_core::prelude::*;
-//! //Generate the base Lexer and useful features used across the whole lexer
-//! lexer!()
-//! //Generate all the keywords (see the keywords section for more information)
-//! keyword!("and", "or", "if", "while")
-//! //Generate all the symbol you want and will use in your language (currently no default implementation)
-//! //symbol!('$' => DollarSign, '#' => HashTag)
-//! //Configure the number parser (more configuration to come and a nice way to enable them too)
-//! number!(enable_f64: true, enable_i64: true)
-//! ```
-//! NB: the order of macros invocation doesn't matter, but their invocations are mandatory (you aren't obliged to give them arguments)
 
-/// Contain a suite of macros to generate a fully fledge lexer tailored to the user needs
+/// Contain a powerful macro to generate a fully fledge lexer tailored to the user needs
 pub mod lexer;
 mod tests;
 /// TODO
@@ -37,12 +24,10 @@ pub mod utils;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
-    pub use crate::keywords;
     pub use crate::lexer;
     pub use crate::lexer::lexer_state::LexerState;
     pub use crate::lexer_builder;
     pub use crate::map;
-    pub use crate::symbols;
     pub use crate::utils::{case::Case, span::*};
     pub use internment::Intern;
 }
