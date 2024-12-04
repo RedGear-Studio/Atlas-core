@@ -18,7 +18,6 @@
 
 /// Contain a powerful macro to generate a fully fledge lexer tailored to the user needs
 pub mod lexer;
-mod tests;
 /// TODO
 pub mod utils;
 
