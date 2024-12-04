@@ -23,6 +23,8 @@ pub mod utils;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
+    pub use crate::keywords;
+    pub use crate::tokens;
     pub use crate::lexer;
     pub use crate::lexer::lexer_state::LexerState;
     pub use crate::lexer_builder;
