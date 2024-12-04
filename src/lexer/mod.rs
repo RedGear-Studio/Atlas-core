@@ -1,6 +1,6 @@
 /// TODO
 pub mod lexer_state;
-
+/// To be done
 #[macro_export]
 macro_rules! lexer_builder {
     (
@@ -28,11 +28,11 @@ macro_rules! lexer_builder {
             int: $int:literal $(,)?
         }$(,)?
     ) => {
-        tokens!{
+        crate::tokens!{
             Symbol {$($sym => $variant,)*},
             Number {$($trail_enum($trail_type),)*}
         }
-        keywords!($($x,)*);
+        crate::keywords!($($x,)*);
         pub type System = fn(char, &mut LexerState) -> Option<Token>;
         #[derive(Debug, Default)]
         pub struct AtlasLexer {
@@ -139,7 +139,7 @@ macro_rules! lexer_builder {
                 return Ok(tok);
             }
         }
-        fn default_number(c: char, state: &mut LexerState) -> Option<Token> {
+        pub fn default_number(c: char, state: &mut LexerState) -> Option<Token> {
             if c.is_numeric() {
                 let start = state.current_pos;
                 let mut is_float = false;
@@ -188,7 +188,7 @@ macro_rules! lexer_builder {
                 None
             }
         }
-        fn default_whitespace(c: char, state: &mut LexerState) -> Option<Token> {
+        pub fn default_whitespace(c: char, state: &mut LexerState) -> Option<Token> {
             let start = state.current_pos;
             let tok = match c {
                 ' ' => TokenKind::WhiteSpace,
@@ -211,193 +211,8 @@ macro_rules! lexer_builder {
     };
 }
 
-/*/// To be done
-#[macro_export]
-macro_rules! lexer_builder {
-    (ignore_space: $ignore:literal) => {
-        #[derive(Debug, Default)]
-        pub struct AtlasLexer {
-            sys: Vec<fn(char, &mut LexerState) -> Option<Token>>,
-            path: &'static str,
-            pub current_pos: BytePos,
-            pub source: String,
-        }
-        impl AtlasLexer {
-            //The default should only add the existing default system => find a way to do it correctly :thinking:
-            pub fn default() -> Self {
-                let mut lexer = AtlasLexer::new("<stdin>", String::new());
-                lexer
-                    .add_system(default_number)
-                    .add_system(default_symbol)
-                    .add_system(default_keyword)
-                    .add_system(default_whitespace);
-                lexer
-            }
-            pub fn new(path: &'static str, source: String) -> Self {
-                Self {
-                    sys: vec![],
-                    path,
-                    current_pos: BytePos::from(0),
-                    source,
-                }
-            }
-
-            pub fn set_source(&mut self, source: String) -> &mut Self {
-                self.source = source;
-                self
-            }
-
-            pub fn set_path(&mut self, new_path: &'static str) -> &mut Self {
-                self.path = new_path;
-                self
-            }
-
-            pub fn add_system(
-                &mut self,
-                s: fn(char, &mut LexerState) -> Option<Token>,
-            ) -> &mut Self {
-                self.sys.push(s);
-                self
-            }
-
-            //A way of handling errors will come later
-            pub fn tokenize(&mut self) -> Result<Vec<Token>, ()> {
-                let mut tok: Vec<Token> = vec![];
-                tok.push(Token::new(
-                    Span {
-                        start: self.current_pos,
-                        end: self.current_pos,
-                        path: self.path,
-                    },
-                    TokenKind::SoI,
-                ));
-                loop {
-                    let ch = self.source.chars().nth(usize::from(self.current_pos));
-                    match ch {
-                        Some(c) => {
-                            let state = LexerState::new(
-                                self.current_pos,
-                                self.source
-                                    .get(usize::from(self.current_pos)..self.source.len())
-                                    .unwrap(),
-                                self.path,
-                            );
-                            let mut counter = 0;
-                            for f in &self.sys {
-                                let mut current_state = state.clone();
-                                match f(c, &mut current_state) {
-                                    Some(f) => {
-                                        if $ignore {
-                                            match f.kind() {
-                                                TokenKind::WhiteSpace => {}
-                                                TokenKind::CarriageReturn => {}
-                                                TokenKind::NewLine => {}
-                                                TokenKind::Tabulation => {}
-                                                _ => tok.push(f),
-                                            }
-                                        } else {
-                                            tok.push(f);
-                                        }
-                                        self.current_pos = current_state.current_pos;
-                                        break;
-                                    }
-                                    None => {
-                                        counter += 1;
-                                        continue;
-                                    }
-                                }
-                            }
-                            if counter >= self.sys.len() {
-                                return Err(());
-                            }
-                        }
-                        None => break,
-                    }
-                }
-                tok.push(Token::new(
-                    Span {
-                        start: self.current_pos,
-                        end: self.current_pos,
-                        path: self.path,
-                    },
-                    TokenKind::EoI,
-                ));
-                return Ok(tok);
-            }
-        }
-        fn default_number(c: char, state: &mut LexerState) -> Option<Token> {
-            if c.is_numeric() {
-                let start = state.current_pos;
-                let mut n = String::new();
-                n.push(c);
-                state.next();
-                loop {
-                    if let Some(c) = state.peek() {
-                        if c.is_numeric() {
-                            n.push(*c);
-                            state.next();
-                        } else {
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                if let Some(c) = state.peek() {
-                    if *c == '.' {
-                        n.push(*c);
-                        state.next();
-                        loop {
-                            if let Some(c) = state.peek() {
-                                if c.is_numeric() {
-                                    n.push(*c);
-                                    state.next();
-                                } else {
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                }
-                Some(Token::new(
-                    Span {
-                        start,
-                        end: state.current_pos,
-                        path: state.path,
-                    },
-                    TokenKind::Literal(Literal::Float(n.parse::<f64>().unwrap())),
-                ))
-            } else {
-                None
-            }
-        }
-        fn default_whitespace(c: char, state: &mut LexerState) -> Option<Token> {
-            let start = state.current_pos;
-            let tok = match c {
-                ' ' => TokenKind::WhiteSpace,
-                '\t' => TokenKind::Tabulation,
-                '\n' => TokenKind::NewLine,
-                '\r' => TokenKind::CarriageReturn,
-                _ => return None,
-            };
-            state.next();
-            return Some(Token::new(
-                Span {
-                    start,
-                    end: state.current_pos,
-                    path: state.path,
-                },
-                tok,
-            ))
-        }
-    };
-    () => {
-        lexer_builder!(ignore_space: true);
-    }
-}*/
 /// To be done
+#[macro_export]
 macro_rules! tokens {
     (Symbol {$($sym:literal => $variant:ident),+ $(,)?}, Number {$($trail_enum:ident($trail_type:ty)),+ $(,)?}) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
@@ -515,10 +330,11 @@ macro_rules! tokens {
     };
 }
 /// To be done
+#[macro_export]
 macro_rules! keywords {
     ($($x:literal),* $(,)?) => {
         use std::collections::HashMap;
-        fn default_keyword(c: char, state: &mut LexerState) -> Option<Token> {
+        pub fn default_keyword(c: char, state: &mut LexerState) -> Option<Token> {
             let start = state.current_pos;
             let mut s = String::new();
             if c.is_alphabetic() || c == '_' {
