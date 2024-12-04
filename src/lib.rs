@@ -20,6 +20,7 @@
 pub mod lexer;
 /// TODO
 pub mod utils;
+mod tests;
 
 #[doc = "Used to import the base set of features of this tool"]
 pub mod prelude {
