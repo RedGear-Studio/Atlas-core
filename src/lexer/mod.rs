@@ -8,13 +8,18 @@ macro_rules! lexer_builder {
             number: $number:literal,
             symbol: $symbol:literal,
             keyword: $keyword:literal,
+            string: $string:literal,
             whitespace: {
                 allow_them: $allow_whitespace:literal,
                 use_system: $whitespace:literal$(,)?
             }$(,)?
         },
         Symbols {
-            $($sym:literal => $variant:ident),+ $(,)?
+            Single {
+                $($sym:literal => $variant:ident),+ $(,)?
+            }, Either {
+                $($sym2:literal => $sym3:literal => $variant1:ident, $variant2:ident ),* $(,)?
+            }
         },
         Keyword {
             $($x:literal),* $(,)?
@@ -29,7 +34,13 @@ macro_rules! lexer_builder {
         }$(,)?
     ) => {
         tokens!{
-            Symbol {$($sym => $variant,)*},
+            Symbols {
+                Single {
+                    $($sym => $variant,),*
+                }, Either {
+                    $($sym2 => $sym3 => $variant1, $variant2)*
+                }
+            },
             Number {$($trail_enum($trail_type),)*}
         }
         keywords!($($x,)*);
@@ -48,6 +59,7 @@ macro_rules! lexer_builder {
                 if $symbol {lexer.add_system(default_symbol);}
                 if $keyword {lexer.add_system(default_keyword);}
                 if $whitespace {lexer.add_system(default_whitespace);}
+                if $string {lexer.add_system(default_string);}
                 lexer
             }
             pub fn new(path: &'static str, source: String) -> Self {
@@ -207,14 +219,48 @@ macro_rules! lexer_builder {
                 tok,
             ))
         }
-
+        pub fn default_string(c: char, state: &mut LexerState) -> Option<Token> {
+            let start = state.current_pos;
+            let mut s = String::new();
+            if c == '"' {
+                println!("string in the making");
+                state.next();
+                loop {
+                    if let Some(ch) = state.peek() {
+                        if *ch == '"' {
+                            state.next();
+                            break;
+                        }
+                        s.push(*ch);
+                        state.next();
+                    }
+                }
+                return Some(Token::new(
+                    Span {
+                        start,
+                        end: state.current_pos,
+                        path: state.path,
+                    },
+                    TokenKind::Literal(Literal::StringLiteral(Intern::new(s))),
+                ));
+            } else {
+                None
+            }
+        }
+        
     };
 }
 
 /// To be done
 #[macro_export]
 macro_rules! tokens {
-    (Symbol {$($sym:literal => $variant:ident),+ $(,)?}, Number {$($trail_enum:ident($trail_type:ty)),+ $(,)?}) => {
+    (Symbols {
+        Single {
+            $($sym:literal => $variant:ident),+ $(,)?
+        }, Either {
+            $($sym2:literal =>  $sym3:literal => $variant1:ident, $variant2:ident ),* $(,)?
+        }
+    }, Number {$($trail_enum:ident($trail_type:ty)),+ $(,)?}) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
         pub struct Token {
             span: Span,
@@ -266,6 +312,10 @@ macro_rules! tokens {
             $(
                 $variant,
             )*
+            $(
+                $variant1,
+                $variant2,
+            )*
             WhiteSpace,
             NewLine,
             Tabulation,
@@ -280,6 +330,18 @@ macro_rules! tokens {
                 $(
                     $sym => TokenKind::$variant,
                 )*
+                $(
+                    $sym2 => if let Some(c) = state.peek() {
+                        if *c == $sym3 {
+                            state.next();
+                            TokenKind::$variant1
+                        } else {
+                            TokenKind::$variant2
+                        }
+                    } else {
+                        TokenKind::$variant2
+                    }
+                )*
                 _ => return None,
             };
             state.next();
@@ -291,41 +353,6 @@ macro_rules! tokens {
                 },
                 tok,
             ))
-        }
-    };
-    () => {
-        symbols!{
-            '+' => Plus,
-            '-' => Minus,
-            '*' => Asterisk,
-            '/' => Slash,
-            '%' => Percent,
-            '=' => Equal,
-            '<' => LessThan,
-            '>' => GreaterThan,
-            '!' => Exclamation,
-            '&' => Ampersand,
-            '|' => Pipe,
-            '^' => Caret,
-            '~' => Tilde,
-            '(' => LeftParen,
-            ')' => RightParen,
-            '[' => LeftBracket,
-            ']' => RightBracket,
-            '{' => LeftBrace,
-            '}' => RightBrace,
-            '.' => Dot,
-            ',' => Comma,
-            ';' => Semicolon,
-            ':' => Colon,
-            '?' => Question,
-            '#' => Hash,
-            '$' => Dollar,
-            '@' => At,
-            '\\' => Backslash,
-            '\'' => SingleQuote,
-            '"' => DoubleQuote,
-            '`' => Backtick
         }
     };
 }
@@ -357,14 +384,18 @@ macro_rules! keywords {
                         break;
                     }
                 }
-                if let Some(k) = keywords.get(&Intern::new(s)) {
+                if let Some(k) = keywords.get(&Intern::new(s.clone())) {
                     Some(Token::new(Span {
                         start,
                         end: state.current_pos,
                         path: state.path
                     }, *k))
                 } else {
-                    return None;
+                    return Some(Token::new(Span {
+                        start,
+                        end:state.current_pos,
+                        path: state.path
+                    }, TokenKind::Literal(Literal::Identifier(Intern::new(s)))));
                 }
             } else {
                 None

@@ -8,13 +8,19 @@ mod tests {
                 number: true,
                 symbol: true,
                 keyword: true,
+                string: true,
                 whitespace: {
                     allow_them: true,
                     use_system: true,
                 },
             },
             Symbols {
-                '.' => DOT,
+                Single {
+                    '.' => Dot,
+                },
+                Either {
+                    ':' => ':' => DoubleColon, Colon
+                }
             },
             Keyword { },
             Number {
