@@ -17,9 +17,11 @@ mod tests {
             Symbols {
                 Single {
                     '.' => Dot,
+                    '-' => Minus,
                 },
                 Either {
-                    ':' => ':' => DoubleColon, Colon
+                    ':' => ':' => DoubleColon, Colon,
+                    '!' => '=' => Neq, Bang
                 }
             },
             Keyword { },

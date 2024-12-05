@@ -16,7 +16,7 @@ macro_rules! lexer_builder {
         },
         Symbols {
             Single {
-                $($sym:literal => $variant:ident),+ $(,)?
+                $($sym:literal => $variant:ident),* $(,)?
             }, Either {
                 $($sym2:literal => $sym3:literal => $variant1:ident, $variant2:ident ),* $(,)?
             }
@@ -36,9 +36,9 @@ macro_rules! lexer_builder {
         tokens!{
             Symbols {
                 Single {
-                    $($sym => $variant,),*
+                    $($sym => $variant),*
                 }, Either {
-                    $($sym2 => $sym3 => $variant1, $variant2)*
+                    $($sym2 => $sym3 => $variant1, $variant2),*
                 }
             },
             Number {$($trail_enum($trail_type),)*}
@@ -256,7 +256,7 @@ macro_rules! lexer_builder {
 macro_rules! tokens {
     (Symbols {
         Single {
-            $($sym:literal => $variant:ident),+ $(,)?
+            $($sym:literal => $variant:ident),* $(,)?
         }, Either {
             $($sym2:literal =>  $sym3:literal => $variant1:ident, $variant2:ident ),* $(,)?
         }
