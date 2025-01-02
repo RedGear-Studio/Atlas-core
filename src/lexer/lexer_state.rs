@@ -18,7 +18,7 @@ pub struct LexerState<'lex> {
     /// to allow lookahead operations. `Peekable` enables efficient peeking at the
     /// next character without advancing the iterator.
     txt: Peekable<Chars<'lex>>,
-    /// 
+    ///
     pub path: &'static str,
 }
 

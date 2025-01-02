@@ -247,7 +247,7 @@ macro_rules! lexer_builder {
                 None
             }
         }
-        
+
     };
 }
 
@@ -258,7 +258,7 @@ macro_rules! tokens {
         Single {
             $($sym:literal => $variant:ident),* $(,)?
         }, Either {
-            $($sym2:literal =>  $sym3:literal => $variant1:ident, $variant2:ident ),* $(,)?
+            $($sym2:literal =>  $sym3:literal => $variant2:ident, $variant3:ident ),* $(,)?
         }
     }, Number {$($trail_enum:ident($trail_type:ty)),+ $(,)?}) => {
         #[derive(Debug, Clone, Copy, PartialEq)]
@@ -275,7 +275,7 @@ macro_rules! tokens {
         }
 
         impl Token {
-            pub fn new(span: Span, kind: TokenKind) -> Self {
+            pub const fn new(span: Span, kind: TokenKind) -> Self {
                 Self { span, kind }
             }
             #[inline(always)]
@@ -313,8 +313,8 @@ macro_rules! tokens {
                 $variant,
             )*
             $(
-                $variant1,
                 $variant2,
+                $variant3,
             )*
             WhiteSpace,
             NewLine,
@@ -326,25 +326,32 @@ macro_rules! tokens {
         //TODO: add support for multi-char symbols
         fn default_symbol(c: char, state: &mut LexerState) -> Option<Token> {
             let start = state.current_pos;
+            let mut advanced = false;
             let tok = match c {
                 $(
                     $sym => TokenKind::$variant,
                 )*
                 $(
-                    $sym2 => if let Some(c) = state.peek() {
-                        if *c == $sym3 {
-                            state.next();
-                            TokenKind::$variant1
+                    $sym2 => if let Some(_) = state.peek() {
+                        state.next();
+                        advanced = true;
+                        if let Some(c) = state.peek() {
+                            if *c == $sym3 {
+                                state.next();
+                                TokenKind::$variant2
+                            } else {
+                                TokenKind::$variant3
+                            }
                         } else {
-                            TokenKind::$variant2
+                            TokenKind::$variant3
                         }
                     } else {
-                        TokenKind::$variant2
+                        TokenKind::$variant3
                     }
                 )*
                 _ => return None,
             };
-            state.next();
+            if !advanced {state.next();}
             Some(Token::new(
                 Span {
                     start,
@@ -403,4 +410,3 @@ macro_rules! keywords {
         }
     };
 }
-
